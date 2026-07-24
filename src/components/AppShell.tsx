@@ -27,7 +27,7 @@ export default function AppShell({ children }: AppShellProps) {
 
   const navigation = [
     { name: 'Overview', href: '/', icon: LayoutDashboard },
-    { name: 'Breaking', href: '/breaking', icon: Radio, countBadge: stories.filter(s => s.isBreaking).length },
+    { name: 'Breaking', href: '/breaking', icon: Radio, countBadge: stories.filter(s => (s.corroboratingSources && s.corroboratingSources.length > 1) || (s.importanceScore && s.importanceScore >= 90)).length },
     { name: 'AI & Tech', href: '/ai-tech', icon: Cpu },
     { name: 'Business', href: '/business', icon: TrendingUp },
     { name: 'World', href: '/world', icon: Globe },
