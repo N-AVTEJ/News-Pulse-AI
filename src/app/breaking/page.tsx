@@ -4,21 +4,21 @@ import React from 'react';
 import { AlertOctagon, Flame } from 'lucide-react';
 import { usePulse } from '@/context/PulseContext';
 import StoryCard from '@/components/StoryCard';
-import { Story } from '@/data/mockData';
+import { NewsStory } from '@/lib/news/types';
 
 export default function BreakingPage() {
   const { stories, savedStories, toggleSave, setSelectedStory, setIsDetailOpen, searchQuery } = usePulse();
 
-  // Filter breaking stories
+  // Filter breaking stories (stories reported by multiple sources or high importance)
   const breakingStories = stories.filter(story => {
-    const isBreaking = story.isBreaking || story.importanceScore >= 90;
+    const isBreaking = (story.corroboratingSources && story.corroboratingSources.length > 1) || (story.importanceScore && story.importanceScore >= 90);
     const matchesSearch = searchQuery === '' || 
       story.headline.toLowerCase().includes(searchQuery.toLowerCase()) ||
       story.summary.toLowerCase().includes(searchQuery.toLowerCase());
     return isBreaking && matchesSearch;
   });
 
-  const handleSelectStory = (story: Story) => {
+  const handleSelectStory = (story: NewsStory) => {
     setSelectedStory(story);
     setIsDetailOpen(true);
   };

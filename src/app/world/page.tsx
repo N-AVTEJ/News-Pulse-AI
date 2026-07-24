@@ -4,7 +4,7 @@ import React from 'react';
 import { Globe } from 'lucide-react';
 import { usePulse } from '@/context/PulseContext';
 import StoryCard from '@/components/StoryCard';
-import { Story } from '@/data/mockData';
+import { NewsStory } from '@/lib/news/types';
 
 export default function WorldPage() {
   const { stories, savedStories, toggleSave, setSelectedStory, setIsDetailOpen, searchQuery } = usePulse();
@@ -17,7 +17,7 @@ export default function WorldPage() {
     return isCategory && matchesSearch;
   });
 
-  const handleSelectStory = (story: Story) => {
+  const handleSelectStory = (story: NewsStory) => {
     setSelectedStory(story);
     setIsDetailOpen(true);
   };
