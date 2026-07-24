@@ -86,6 +86,7 @@ export function mapCategory(defaultCategory: NewsCategory, rawCategory?: string)
 /**
  * Converts a raw RSS/Atom feed item into a normalized NewsStory object.
  */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function normalizeRssItem(item: any, source: SourceConfig): NewsStory {
   const articleUrl = item.link || item.guid || source.homepageUrl;
   const headline = sanitizeText(item.title) || 'Untitled News Release';

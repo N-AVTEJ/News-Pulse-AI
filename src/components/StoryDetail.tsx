@@ -3,8 +3,6 @@
 import React from 'react';
 import { X, Bookmark, BookmarkCheck, Calendar, Globe, ExternalLink, ShieldCheck, Layers, ArrowUpRight } from 'lucide-react';
 import { NewsStory } from '@/lib/news/types';
-import ConfidenceBadge from './ConfidenceBadge';
-import ImportanceScore from './ImportanceScore';
 
 interface StoryDetailProps {
   story: NewsStory | null;

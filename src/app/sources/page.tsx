@@ -65,7 +65,7 @@ export default function SourcesPage() {
       <div className="flex items-start gap-3 p-4 rounded-lg bg-zinc-900/50 border border-zinc-800 text-zinc-400">
         <ShieldCheck className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
         <div className="text-xs font-mono">
-          <span className="font-bold text-zinc-200">REAL NEWS SOURCE REGISTRY</span>: Feeds listed below are fetched server-side from documented public RSS/Atom feeds. Reliability metrics are set to <span className="text-indigo-400 font-bold">"Not evaluated"</span> until multi-agent cross-verification runs in Phase 3+.
+          <span className="font-bold text-zinc-200">REAL NEWS SOURCE REGISTRY</span>: Feeds listed below are fetched server-side from documented public RSS/Atom feeds. Reliability metrics are set to <span className="text-indigo-400 font-bold">&quot;Not evaluated&quot;</span> until multi-agent cross-verification runs in Phase 3+.
         </div>
       </div>
 

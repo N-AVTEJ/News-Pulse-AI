@@ -1,5 +1,5 @@
 import Parser from 'rss-parser';
-import { getEnabledSources, getSourceById, SOURCES_REGISTRY } from './sources';
+import { getEnabledSources, getSourceById } from './sources';
 import { IngestionResponse, NewsCategory, NewsStory, SourceConfig, SourceStatus } from './types';
 import { normalizeRssItem } from './normalize';
 import { deduplicateStories } from './deduplicate';
@@ -66,9 +66,9 @@ async function fetchSource(source: SourceConfig): Promise<{ stories: NewsStory[]
     };
 
     return { stories, status };
-  } catch (error: any) {
+  } catch (error: unknown) {
     const duration = Date.now() - startTime;
-    const errorMsg = error.message || 'Unknown fetch error';
+    const errorMsg = error instanceof Error ? error.message : 'Unknown fetch error';
     console.error(`[IngestionLog] [FAILED] ${source.name}: ${errorMsg} after ${duration}ms`);
 
     const status: SourceStatus = {

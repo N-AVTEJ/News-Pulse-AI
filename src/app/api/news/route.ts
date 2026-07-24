@@ -45,10 +45,11 @@ export async function GET(request: NextRequest) {
         'Cache-Control': 'public, s-maxage=300, stale-while-revalidate=60'
       }
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('[API Error] GET /api/news failed:', error);
     return NextResponse.json(
-      { error: 'Failed to ingest real news feeds.', details: error.message },
+      { error: 'Failed to ingest real news feeds.', details: message },
       { status: 500 }
     );
   }

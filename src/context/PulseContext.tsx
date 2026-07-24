@@ -65,7 +65,8 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
           return agent;
         })
       );
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown error';
       console.error('[PulseContext] Failed to fetch real news:', err);
       setActivityLogs((prev) => [
         {
@@ -73,7 +74,7 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
           timestamp: 'Just now',
           agentId: 'system',
           agentName: 'System Ingestion',
-          message: `Ingestion fetch error: ${err.message}`,
+          message: `Ingestion fetch error: ${msg}`,
           type: 'error'
         },
         ...prev
@@ -86,7 +87,33 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
 
   // Fetch on mount
   useEffect(() => {
-    fetchNews();
+    let isMounted = true;
+
+    async function loadInitialNews() {
+      try {
+        const res = await fetch('/api/news');
+        if (!res.ok) throw new Error(`API HTTP Error ${res.status}`);
+        const data = await res.json();
+
+        if (isMounted) {
+          setStories(data.stories || []);
+          setSourceStatus(data.sourceStatus || []);
+          setLastScanTime('Just now');
+        }
+      } catch (err: unknown) {
+        console.error('[PulseContext] Mount fetch failed:', err);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadInitialNews();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const toggleSave = (storyId: string) => {

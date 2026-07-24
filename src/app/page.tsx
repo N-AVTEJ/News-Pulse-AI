@@ -7,7 +7,6 @@ import {
 } from 'lucide-react';
 import { usePulse } from '@/context/PulseContext';
 import MetricCard from '@/components/MetricCard';
-import BreakingStory from '@/components/BreakingStory';
 import StoryCard from '@/components/StoryCard';
 import ActivityFeed from '@/components/ActivityFeed';
 import SourceStatusAlert from '@/components/SourceStatusAlert';
