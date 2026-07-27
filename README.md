@@ -4,80 +4,103 @@ NewsPulse AI is an autonomous multi-agent news intelligence platform designed to
 
 ---
 
-## 🏗 Phase 2 Architecture & Ingestion Flow
-
-In Phase 2, NewsPulse AI replaces mock news feeds with a production-quality, server-side news ingestion layer powered by verified RSS/Atom feeds.
+## 🏗 System Architecture & Ingestion Flow
 
 ```
-RSS / Atom Feeds (TechCrunch, Ars Technica, Wired, CNBC, BBC, NPR)
-                        │
-                        ▼
-      Central Source Registry (src/lib/news/sources.ts)
-                        │
-                        ▼
-Parallel Fetchers with Timeout & Fault Tolerance (Promise.allSettled)
-                        │
-                        ▼
-   Normalizer & HTML Sanitizer (src/lib/news/normalize.ts)
-                        │
-                        ▼
-Deterministic Deduplication Engine (src/lib/news/deduplicate.ts)
-                        │
-                        ▼
-    Server-Side Cache (src/lib/news/ingest.ts - 5m TTL)
-                        │
-                        ▼
-       GET /api/news Endpoint (src/app/api/news/route.ts)
-                        │
-                        ▼
-NewsPulse AI Command Dashboard (PulseContext -> Overview, Category & Sources pages)
+                   NEWS INGESTION (Phase 2)
+                             │
+                             ▼
+                     NORMALIZED STORIES
+                             │
+                             ▼
+                     SCOUT ORCHESTRATOR
+                             │
+      +----------------------+----------------------+
+      │                      │                      │
+      v                      v                      v
+AI & TECH SCOUT       BUSINESS SCOUT           WORLD SCOUT
+      │                      │                      │
+      +----------------------+----------------------+
+                             │
+                             ▼
+                       RESULT MERGER
+                             │
+                             ▼
+                     SCOUT INTELLIGENCE
+                             │
+                             ▼
+                   AGENTS DASHBOARD (UI)
 ```
 
 ---
 
-## 📰 Source Strategy & Registry
+## 🤖 Phase 3: Multi-Agent News Scout System
 
-All news stories originate from verified public RSS/Atom feeds configured in `src/lib/news/sources.ts`:
+Phase 3 introduces a deterministic, explainable runtime multi-agent scout architecture:
 
-- **TechCrunch** (`https://techcrunch.com/feed/`) — AI & Tech
-- **Ars Technica** (`https://feeds.arstechnica.com/arstechnica/index`) — AI & Tech
-- **Wired** (`https://www.wired.com/feed/rss`) — AI & Tech
-- **CNBC Business** (`https://www.cnbc.com/id/10000115/device/rss/rss.html`) — Business
-- **BBC World News** (`https://feeds.bbci.co.uk/news/world/rss.xml`) — World
-- **NPR World News** (`https://feeds.npr.org/1004/rss.xml`) — World
+### 1. Common Scout Interface (`src/lib/agents/types.ts`)
+All Scouts implement a unified TypeScript interface `ScoutAgent`:
+- `id`: Unique identifier (`tech-scout`, `business-scout`, `world-scout`).
+- `name`: Human readable Scout title.
+- `category`: Domain area (`ai-tech`, `business`, `world`).
+- `description`: Role definition.
+- `execute(stories: NewsStory[], config?: ScoutConfigOptions)`: Returns structured `ScoutResult` containing telemetry & selected candidates.
+
+### 2. Configurable Signal Dictionaries (`src/lib/agents/shared/keywords.ts`)
+- **AI & Tech Scout**: `MODEL_RELEASE`, `PRODUCT_LAUNCH`, `SECURITY_INCIDENT`, `MAJOR_RESEARCH`, `REGULATORY_CHANGE`, `ACQUISITION`, `FUNDING`, `INFRASTRUCTURE`, `PLATFORM_CHANGE`.
+- **Business Scout**: `EARNINGS`, `ACQUISITION`, `MERGER`, `FUNDING`, `LAYOFF`, `EXECUTIVE_CHANGE`, `REGULATION`, `INVESTMENT`, `PARTNERSHIP`, `MARKET_MOVE`.
+- **World News Scout**: `GOVERNMENT_ACTION`, `ELECTION`, `DIPLOMACY`, `ECONOMIC_POLICY`, `DISASTER`, `INFRASTRUCTURE`, `INTERNATIONAL_AGREEMENT`, `PUBLIC_SAFETY`.
+
+### 3. Deterministic 0-100 Selection Scoring Model (`src/lib/agents/shared/scoring.ts`)
+Calculates an explainable **Scout Selection Score** (0-100):
+- **Domain Alignment**: +25 pts
+- **Primary Signal Match**: +30 pts
+- **Secondary Signals**: +10 pts each (max +20)
+- **Corroborating Outlets**: +10/+15 pts (from Phase 2 deduplicated outlets)
+- **Publication Recency**: +10 pts (<24h) / +5 pts (<48h)
+- **Score Clamp**: 0 to 100 limit.
+- **Explainable Breakdown**: Returns exact score contribution object.
+
+> **Note**: Scout Selection Score represents candidate selection relevance. It is NOT a truth or confidence score.
+
+### 4. Scout Orchestrator & Result Merger (`src/lib/agents/orchestrator.ts`)
+- **Execution ID**: Generates unique `run_<timestamp>_<rand>`.
+- **Concurrency & Fault Isolation**: Executes all registered Scouts concurrently via `Promise.allSettled()`. A failure in one Scout does not break execution or destroy results from others.
+- **Cross-Scout Result Merging**: Merges articles sharing canonical URLs while preserving `matchedScouts` (e.g. `['tech-scout', 'business-scout']`), combined signals, and per-scout scores.
 
 ---
 
-## ⚙️ Ingestion, Normalization & Deduplication
+## 📌 API Reference
 
-1. **Normalization (`normalize.ts`)**:
-   - Strips raw HTML tags and decodes HTML entities (`&amp;`, `&quot;`, etc.) from XML descriptions.
-   - Parses pubDates into clean ISO 8601 timestamps with fallback handling.
-   - Maps raw source categories into `ai-tech`, `business`, and `world`.
-2. **Deduplication (`deduplicate.ts`)**:
-   - **Canonical Article URL**: Prevents duplicate entries sharing exact article URLs.
-   - **Normalized Headline Match**: Strips punctuation, converts to lowercase, and collapses whitespace to detect identical stories across different outlets while merging corroborating source attributions.
-3. **Fault Tolerance & Caching (`ingest.ts`)**:
-   - Uses `Promise.allSettled` so an individual feed outage does not break other feeds.
-   - 5-minute server-side memory cache with support for `?refresh=true` forced cache revalidations.
+### `POST /api/agents/scout`
+Triggers Phase 2 ingestion and runs the Scout Orchestrator on real news feeds.
 
----
+Body parameters (optional):
+- `minScore`: Minimum candidate selection score threshold (default: `40`).
+- `refresh`: Force fresh ingestion scan (`true`).
 
-## 🚀 Getting Started & Local Development
-
-### Prerequisites
-- Node.js 18+
-- npm
-
-### Installation
-```bash
-# Install dependencies
-npm install
+Response sample:
+```json
+{
+  "executionId": "run_1785169773152_79rkmq",
+  "status": "SUCCESS",
+  "startedAt": "2026-07-27T21:59:33.152Z",
+  "completedAt": "2026-07-27T21:59:33.520Z",
+  "durationMs": 368,
+  "totalStoriesProcessed": 166,
+  "totalSelected": 42,
+  "agentTelemetry": [...],
+  "intelligence": [...]
+}
 ```
+
+---
+
+## 🚀 Getting Started & Testing
 
 ### Run Tests
 ```bash
-# Run Vitest unit test suite for deterministic ingestion logic
+# Run Vitest test suite (Unit & Integration tests)
 npx vitest run
 ```
 
@@ -90,33 +113,9 @@ npm run lint
 npm run build
 ```
 
-### Start Local Server
+### Start Server
 ```bash
-# Start Next.js server
+# Start local server
 npm run start
 ```
-Open [http://localhost:3000](http://localhost:3000) in your browser.
-
----
-
-## 📌 API Reference
-
-### `GET /api/news`
-
-Query parameters:
-- `category` (optional): `ai-tech` | `business` | `world`
-- `source` (optional): Source ID (e.g. `techcrunch`)
-- `limit` (optional): Truncate response to N stories
-- `refresh` (optional): Set to `true` to force a cache refresh
-
-Example:
-```bash
-curl "http://localhost:3000/api/news?category=ai-tech&limit=10"
-```
-
----
-
-## ⚠️ Known Limitations & Future Phase Roadmap
-
-- **Phase 3 (Upcoming)**: Autonomous multi-agent verification, LLM executive summaries, importance scoring, and semantic vector clustering.
-- **Current Intelligence Metrics**: Real ingested stories do not display simulated scores. Intelligence fields are truthfully marked as *"Verification Pending"* or *"Not evaluated"*.
+Open [http://localhost:3000/agents](http://localhost:3000/agents) to view the Agent Operations Command Center.

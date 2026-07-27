@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Agent, ActivityLog, mockAgents, mockActivityLogs } from '@/data/mockData';
 import { NewsStory, SourceStatus } from '@/lib/news/types';
+import { MergedIntelligenceStory, OrchestratorExecutionResult, ScoutResult } from '@/lib/agents/types';
 
 interface PulseContextType {
   stories: NewsStory[];
@@ -20,8 +21,11 @@ interface PulseContextType {
   toggleAgentStatus: (agentId: string) => void;
   lastScanTime: string;
   triggerManualScan: () => void;
+  triggerScoutScan: () => Promise<void>;
   isScanning: boolean;
   isLoading: boolean;
+  executionResult: OrchestratorExecutionResult | null;
+  scoutIntelligence: MergedIntelligenceStory[];
 }
 
 const PulseContext = createContext<PulseContextType | undefined>(undefined);
@@ -39,6 +43,10 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
   const [isScanning, setIsScanning] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Phase 3 Multi-Agent State
+  const [executionResult, setExecutionResult] = useState<OrchestratorExecutionResult | null>(null);
+  const [scoutIntelligence, setScoutIntelligence] = useState<MergedIntelligenceStory[]>([]);
+
   // Fetch real stories from GET /api/news
   const fetchNews = async (forceRefresh = false) => {
     setIsScanning(true);
@@ -51,45 +59,74 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
       setStories(data.stories || []);
       setSourceStatus(data.sourceStatus || []);
       setLastScanTime('Just now');
-
-      // Update agent stats truthfully
-      setAgents((prevAgents) =>
-        prevAgents.map((agent) => {
-          if (agent.status !== 'IDLE') {
-            return {
-              ...agent,
-              storiesProcessed: agent.storiesProcessed + (data.stories?.length || 0),
-              lastExecution: 'Just now'
-            };
-          }
-          return agent;
-        })
-      );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
       console.error('[PulseContext] Failed to fetch real news:', err);
-      setActivityLogs((prev) => [
-        {
-          id: `log-err-${Date.now()}`,
-          timestamp: 'Just now',
-          agentId: 'system',
-          agentName: 'System Ingestion',
-          message: `Ingestion fetch error: ${msg}`,
-          type: 'error'
-        },
-        ...prev
-      ]);
     } finally {
       setIsScanning(false);
       setIsLoading(false);
     }
   };
 
-  // Fetch on mount
+  // Trigger full multi-agent scout execution POST /api/agents/scout
+  const triggerScoutScan = async () => {
+    if (isScanning) return;
+    setIsScanning(true);
+
+    try {
+      const res = await fetch('/api/agents/scout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh: true, minScore: 40 })
+      });
+
+      if (!res.ok) throw new Error(`Scout API HTTP Error ${res.status}`);
+
+      const data = await res.json();
+      setExecutionResult({
+        executionId: data.executionId,
+        startedAt: data.startedAt,
+        completedAt: data.completedAt,
+        durationMs: data.durationMs,
+        status: data.status,
+        totalStoriesProcessed: data.totalStoriesProcessed,
+        totalSelected: data.totalSelected,
+        agentTelemetry: data.agentTelemetry || [],
+        intelligence: data.intelligence || []
+      });
+
+      setScoutIntelligence(data.intelligence || []);
+
+      // Append real execution activity logs
+      if (Array.isArray(data.activityLogs)) {
+        setActivityLogs((prev) => [...data.activityLogs, ...prev.slice(0, 30)]);
+      }
+
+      setLastScanTime('Just now');
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Scout run error';
+      console.error('[PulseContext] Scout scan failed:', err);
+      setActivityLogs((prev) => [
+        {
+          id: `log-err-${Date.now()}`,
+          timestamp: 'Just now',
+          agentId: 'orchestrator',
+          agentName: 'Scout Orchestrator',
+          message: `Scout run failed: ${msg}`,
+          type: 'error'
+        },
+        ...prev
+      ]);
+    } finally {
+      setIsScanning(false);
+    }
+  };
+
+  // Fetch initial news and run initial scout execution on mount
   useEffect(() => {
     let isMounted = true;
 
-    async function loadInitialNews() {
+    async function loadInitial() {
       try {
         const res = await fetch('/api/news');
         if (!res.ok) throw new Error(`API HTTP Error ${res.status}`);
@@ -100,6 +137,32 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
           setSourceStatus(data.sourceStatus || []);
           setLastScanTime('Just now');
         }
+
+        // Trigger initial scout run
+        const scoutRes = await fetch('/api/agents/scout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ minScore: 40 })
+        });
+
+        if (scoutRes.ok && isMounted) {
+          const scoutData = await scoutRes.json();
+          setExecutionResult({
+            executionId: scoutData.executionId,
+            startedAt: scoutData.startedAt,
+            completedAt: scoutData.completedAt,
+            durationMs: scoutData.durationMs,
+            status: scoutData.status,
+            totalStoriesProcessed: scoutData.totalStoriesProcessed,
+            totalSelected: scoutData.totalSelected,
+            agentTelemetry: scoutData.agentTelemetry || [],
+            intelligence: scoutData.intelligence || []
+          });
+          setScoutIntelligence(scoutData.intelligence || []);
+          if (Array.isArray(scoutData.activityLogs)) {
+            setActivityLogs((prev) => [...scoutData.activityLogs, ...prev.slice(0, 30)]);
+          }
+        }
       } catch (err: unknown) {
         console.error('[PulseContext] Mount fetch failed:', err);
       } finally {
@@ -109,7 +172,7 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
       }
     }
 
-    loadInitialNews();
+    loadInitial();
 
     return () => {
       isMounted = false;
@@ -151,18 +214,7 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
   };
 
   const triggerManualScan = () => {
-    if (isScanning) return;
-    const startLog: ActivityLog = {
-      id: `log-scan-${Date.now()}`,
-      timestamp: 'Just now',
-      agentId: 'system',
-      agentName: 'System Core',
-      message: 'Global real news ingestion manual scan triggered.',
-      type: 'info'
-    };
-    setActivityLogs((prev) => [startLog, ...prev]);
-
-    fetchNews(true);
+    triggerScoutScan();
   };
 
   return (
@@ -183,8 +235,11 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
         toggleAgentStatus,
         lastScanTime,
         triggerManualScan,
+        triggerScoutScan,
         isScanning,
-        isLoading
+        isLoading,
+        executionResult,
+        scoutIntelligence
       }}
     >
       {children}
