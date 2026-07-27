@@ -57,12 +57,12 @@ export const BUSINESS_SIGNALS: Record<BusinessSignalKey, string[]> = {
 };
 
 export const WORLD_SIGNALS: Record<WorldSignalKey, string[]> = {
-  GOVERNMENT_ACTION: ['parliament', 'congress', 'president', 'prime minister', 'sanctions', 'government', 'decree', 'court', 'ruling', 'white house', 'state department'],
+  GOVERNMENT_ACTION: ['parliament', 'congress', 'president', 'prime minister', 'sanctions', 'government', 'decree', 'supreme court', 'white house', 'state department'],
   ELECTION: ['election', 'vote', 'ballot', 'candidate', 'poll', 'campaign', 'voters', 'electoral'],
-  DIPLOMACY: ['summit', 'treaty', 'talks', 'ambassador', 'diplomat', 'peace', 'accord', 'un', 'united nations', 'ceasefire'],
-  ECONOMIC_POLICY: ['tariff', 'trade', 'central bank', 'gdp', 'inflation', 'currency', 'wto', 'imf', 'exports', 'imports'],
+  DIPLOMACY: ['summit', 'treaty', 'talks', 'ambassador', 'diplomat', 'peace', 'accord', 'united nations', 'ceasefire'],
+  ECONOMIC_POLICY: ['tariff', 'trade agreement', 'central bank', 'gdp', 'inflation', 'currency', 'wto', 'imf', 'exports', 'imports'],
   DISASTER: ['earthquake', 'volcano', 'flood', 'storm', 'hurricane', 'disaster', 'wildfire', 'tsunami', 'eruption'],
-  INFRASTRUCTURE: ['port', 'shipping', 'blackout', 'grid', 'pipeline', 'rail', 'canal', 'freight', 'maritime', 'logistics'],
-  INTERNATIONAL_AGREEMENT: ['accord', 'pact', 'coalition', 'treaty', 'bilateral', 'convention', 'alliance'],
-  PUBLIC_SAFETY: ['emergency', 'evacuation', 'outbreak', 'quarantine', 'warning', 'hazard', 'health', 'safety']
+  INFRASTRUCTURE: ['port anchorage', 'shipping lane', 'power blackout', 'energy grid', 'pipeline', 'rail network', 'suez canal', 'freight logistics', 'maritime border'],
+  INTERNATIONAL_AGREEMENT: ['accord', 'pact', 'coalition', 'treaty', 'bilateral treaty', 'geneva convention', 'alliance'],
+  PUBLIC_SAFETY: ['state of emergency', 'evacuation', 'outbreak', 'quarantine', 'travel warning', 'biohazard', 'public health']
 };
