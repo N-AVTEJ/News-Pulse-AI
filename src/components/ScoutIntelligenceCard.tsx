@@ -1,13 +1,14 @@
 'use client';
 
 import React from 'react';
-import { ExternalLink, Layers, HelpCircle, Globe, Shield, Clock } from 'lucide-react';
+import { ExternalLink, HelpCircle, Globe, Shield, Clock } from 'lucide-react';
 import { MergedIntelligenceStory } from '@/lib/agents/types';
+import { NewsStory } from '@/lib/news/types';
 
 interface ScoutIntelligenceCardProps {
   item: MergedIntelligenceStory;
   onViewBreakdown: (item: MergedIntelligenceStory) => void;
-  onSelectStory: (story: any) => void;
+  onSelectStory: (story: NewsStory) => void;
 }
 
 export default function ScoutIntelligenceCard({ item, onViewBreakdown, onSelectStory }: ScoutIntelligenceCardProps) {

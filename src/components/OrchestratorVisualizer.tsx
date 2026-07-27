@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Cpu, TrendingUp, Globe, Activity, ArrowDown, ShieldCheck, AlertTriangle } from 'lucide-react';
+import { Cpu, TrendingUp, Globe, Activity, ArrowDown } from 'lucide-react';
 import { OrchestratorExecutionResult, ScoutResult } from '@/lib/agents/types';
 
 interface OrchestratorVisualizerProps {

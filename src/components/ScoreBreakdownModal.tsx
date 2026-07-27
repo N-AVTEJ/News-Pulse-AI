@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, HelpCircle, CheckCircle, Info } from 'lucide-react';
+import { X, HelpCircle, Info } from 'lucide-react';
 import { MergedIntelligenceStory } from '@/lib/agents/types';
 
 interface ScoreBreakdownModalProps {
@@ -86,7 +86,7 @@ export default function ScoreBreakdownModal({ item, isOpen, onClose }: ScoreBrea
 
         {/* Reason summary */}
         <div className="text-[11px] text-zinc-500 bg-zinc-900/30 p-2.5 rounded border border-zinc-900 italic">
-          "{item.selectionReason}"
+          &quot;{item.selectionReason}&quot;
         </div>
       </div>
     </div>

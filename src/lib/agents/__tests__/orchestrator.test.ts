@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { runScoutOrchestrator, mergeScoutResults } from '../orchestrator';
+import { runScoutOrchestrator } from '../orchestrator';
 import { NewsStory } from '../../news/types';
 import { ScoutAgent, ScoutResult } from '../types';
 

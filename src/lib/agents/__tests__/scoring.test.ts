@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { detectSignals, calculateSelectionScore } from '../shared/scoring';
-import { TECH_SIGNALS, BUSINESS_SIGNALS } from '../shared/keywords';
+import { TECH_SIGNALS } from '../shared/keywords';
 import { NewsStory } from '../../news/types';
 
 describe('Scout Selection Scoring & Signal Detection', () => {

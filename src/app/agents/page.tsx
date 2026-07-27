@@ -1,7 +1,5 @@
-'use client';
-
 import React, { useState } from 'react';
-import { Cpu, Play, ArrowUpDown, Filter, Sparkles, Database, Activity, RefreshCw } from 'lucide-react';
+import { Cpu, Sparkles, Activity, RefreshCw } from 'lucide-react';
 import { usePulse } from '@/context/PulseContext';
 import AgentCard from '@/components/AgentCard';
 import ActivityFeed from '@/components/ActivityFeed';
@@ -10,6 +8,7 @@ import ScoutIntelligenceCard from '@/components/ScoutIntelligenceCard';
 import ScoreBreakdownModal from '@/components/ScoreBreakdownModal';
 import { MergedIntelligenceStory } from '@/lib/agents/types';
 import { REGISTERED_SCOUTS } from '@/lib/agents/orchestrator';
+import { NewsStory } from '@/lib/news/types';
 
 export default function AgentsPage() {
   const { 
@@ -50,7 +49,7 @@ export default function AgentsPage() {
     setIsBreakdownOpen(true);
   };
 
-  const handleSelectStory = (story: any) => {
+  const handleSelectStory = (story: NewsStory) => {
     setSelectedStory(story);
     setIsDetailOpen(true);
   };

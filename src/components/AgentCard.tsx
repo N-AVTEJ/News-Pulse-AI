@@ -13,7 +13,7 @@ interface AgentCardProps {
   onRunScout?: () => void;
 }
 
-export default function AgentCard({ telemetry, name, role, category, isScanning, onRunScout }: AgentCardProps) {
+export default function AgentCard({ telemetry, name, role, isScanning, onRunScout }: AgentCardProps) {
   const status = isScanning ? 'RUNNING' : telemetry?.status || 'IDLE';
 
   const getStatusConfig = (st: string) => {

@@ -136,7 +136,6 @@ export async function runScoutOrchestrator(
   const results = await Promise.allSettled(scoutPromises);
 
   const agentTelemetry: ScoutResult[] = [];
-  let successfulScouts = 0;
   let failedScouts = 0;
 
   for (let i = 0; i < results.length; i++) {
@@ -145,9 +144,7 @@ export async function runScoutOrchestrator(
 
     if (res.status === 'fulfilled') {
       agentTelemetry.push(res.value);
-      if (res.value.status === 'COMPLETED') {
-        successfulScouts++;
-      } else {
+      if (res.value.status !== 'COMPLETED') {
         failedScouts++;
       }
     } else {

@@ -3,7 +3,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Agent, ActivityLog, mockAgents, mockActivityLogs } from '@/data/mockData';
 import { NewsStory, SourceStatus } from '@/lib/news/types';
-import { MergedIntelligenceStory, OrchestratorExecutionResult, ScoutResult } from '@/lib/agents/types';
+import { MergedIntelligenceStory, OrchestratorExecutionResult } from '@/lib/agents/types';
 
 interface PulseContextType {
   stories: NewsStory[];
@@ -61,7 +61,7 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
       setLastScanTime('Just now');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
-      console.error('[PulseContext] Failed to fetch real news:', err);
+      console.error('[PulseContext] Failed to fetch real news:', msg);
     } finally {
       setIsScanning(false);
       setIsLoading(false);
@@ -214,6 +214,7 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
   };
 
   const triggerManualScan = () => {
+    fetchNews(true);
     triggerScoutScan();
   };
 
