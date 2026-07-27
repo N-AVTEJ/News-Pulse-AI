@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { Cpu, Sparkles, Activity, RefreshCw } from 'lucide-react';
 import { usePulse } from '@/context/PulseContext';
