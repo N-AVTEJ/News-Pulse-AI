@@ -1,4 +1,4 @@
-import { ActivityLog } from '../../data/mockData';
+import { ActivityLog } from '@/data/mockData';
 import { OrchestratorExecutionResult } from '../types';
 
 let latestRun: OrchestratorExecutionResult | null = null;
