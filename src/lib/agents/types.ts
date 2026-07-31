@@ -1,4 +1,5 @@
 import { NewsCategory, NewsStory } from '../news/types';
+import { EventCluster } from '../clustering/types';
 
 export type ScoutCategory = NewsCategory;
 
@@ -17,6 +18,7 @@ export interface ScoreBreakdown {
 
 export interface ScoutStoryResult {
   story: NewsStory;
+  clusterId?: string;
   scoutId: string;
   scoutName: string;
   matchedCategory: ScoutCategory;
@@ -51,11 +53,13 @@ export interface ScoutAgent {
   category: ScoutCategory;
   description: string;
   execute(stories: NewsStory[], config?: ScoutConfigOptions): Promise<ScoutResult>;
+  executeClusters?(clusters: EventCluster[], config?: ScoutConfigOptions): Promise<ScoutResult>;
 }
 
 export interface MergedIntelligenceStory {
   id: string;
   story: NewsStory;
+  cluster?: EventCluster;
   matchedScouts: string[]; // e.g. ["tech-scout", "business-scout"]
   matchedSignals: string[];
   perScoutScores: Record<string, number>;
@@ -76,4 +80,5 @@ export interface OrchestratorExecutionResult {
   totalSelected: number;
   agentTelemetry: ScoutResult[];
   intelligence: MergedIntelligenceStory[];
+  eventClusters?: EventCluster[];
 }
