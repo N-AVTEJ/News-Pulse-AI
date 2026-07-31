@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Layers, GitMerge, BarChart2, Clock } from 'lucide-react';
+import { Layers } from 'lucide-react';
 import { ClusteringTelemetry } from '@/lib/clustering/types';
 
 interface EventClusterVisualizerProps {

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Layers, Globe, Clock, ExternalLink, Shield, Cpu, ChevronRight } from 'lucide-react';
+import { Layers, Globe, Clock, Shield, ChevronRight } from 'lucide-react';
 import { EventCluster } from '@/lib/clustering/types';
 
 interface EventClusterCardProps {

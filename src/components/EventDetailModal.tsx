@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { X, Globe, ExternalLink, ShieldCheck, HelpCircle, AlertTriangle, Layers, Clock, Cpu } from 'lucide-react';
+import { X, AlertTriangle, Layers, Cpu } from 'lucide-react';
 import { EventCluster } from '@/lib/clustering/types';
 import EventTimelineComponent from './EventTimelineComponent';
 
@@ -88,7 +88,7 @@ export default function EventDetailModal({ cluster, isOpen, onClose }: EventDeta
             </div>
 
             <p className="text-[11px] text-zinc-400 italic pt-1">
-              "{cluster.selectionReason}"
+              &quot;{cluster.selectionReason}&quot;
             </p>
           </div>
         )}
@@ -104,7 +104,7 @@ export default function EventDetailModal({ cluster, isOpen, onClose }: EventDeta
           </span>
 
           <p className="text-xs text-zinc-400 italic">
-            "{cluster.clusterReason}"
+            &quot;{cluster.clusterReason}&quot;
           </p>
 
           {b && (
