@@ -41,7 +41,7 @@ export default function OverviewPage() {
     <div className="space-y-6 max-w-7xl mx-auto pb-10 font-sans">
       
       {/* Source Status Warning Banner */}
-      <SourceStatusAlert sources={sourceStatus} />
+      <SourceStatusAlert statuses={sourceStatus} />
 
       {/* Overview Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-900 pb-4 gap-4 font-mono">
