@@ -1,7 +1,7 @@
 import { NewsCategory, NewsStory } from '../news/types';
 import { selectCanonicalHeadline, selectClusterSummary } from './canonicalHeadline';
 import { calculateStorySimilarity } from './similarityEngine';
-import { ClusterConfig, ClusteringTelemetry, EventCluster } from './types';
+import { ClusterConfig, ClusteringTelemetry, EventCluster, SimilarityBreakdown } from './types';
 
 /**
  * Generates a unique deterministic ID for an EventCluster.
@@ -25,7 +25,7 @@ export function clusterStories(
     primaryStory: NewsStory;
     stories: NewsStory[];
     bestReason: string;
-    bestBreakdown: any;
+    bestBreakdown: SimilarityBreakdown;
   }> = new Map();
 
   for (const story of stories) {
@@ -50,6 +50,8 @@ export function clusterStories(
       // Merge story into existing cluster
       const existing = clusterMap.get(matchedClusterId)!;
       existing.stories.push(story);
+      if (bestMatchReason) existing.bestReason = bestMatchReason;
+      if (bestMatchBreakdown) existing.bestBreakdown = bestMatchBreakdown;
     } else {
       // Create new cluster
       const newClusterId = generateClusterId(story.id);
