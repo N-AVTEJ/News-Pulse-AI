@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Agent, ActivityLog, mockAgents, mockActivityLogs } from '@/data/mockData';
 import { NewsStory, SourceStatus } from '@/lib/news/types';
 import { MergedIntelligenceStory, OrchestratorExecutionResult } from '@/lib/agents/types';
+import { ClusteringTelemetry, EventCluster } from '@/lib/clustering/types';
 
 interface PulseContextType {
   stories: NewsStory[];
@@ -26,6 +27,14 @@ interface PulseContextType {
   isLoading: boolean;
   executionResult: OrchestratorExecutionResult | null;
   scoutIntelligence: MergedIntelligenceStory[];
+  
+  // Phase 4 Event Clustering State
+  eventClusters: EventCluster[];
+  clusterTelemetry: ClusteringTelemetry | null;
+  selectedCluster: EventCluster | null;
+  setSelectedCluster: (cluster: EventCluster | null) => void;
+  isClusterDetailOpen: boolean;
+  setIsClusterDetailOpen: (isOpen: boolean) => void;
 }
 
 const PulseContext = createContext<PulseContextType | undefined>(undefined);
@@ -43,9 +52,13 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
   const [isScanning, setIsScanning] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Phase 3 Multi-Agent State
+  // Phase 3 & 4 State
   const [executionResult, setExecutionResult] = useState<OrchestratorExecutionResult | null>(null);
   const [scoutIntelligence, setScoutIntelligence] = useState<MergedIntelligenceStory[]>([]);
+  const [eventClusters, setEventClusters] = useState<EventCluster[]>([]);
+  const [clusterTelemetry, setClusterTelemetry] = useState<ClusteringTelemetry | null>(null);
+  const [selectedCluster, setSelectedCluster] = useState<EventCluster | null>(null);
+  const [isClusterDetailOpen, setIsClusterDetailOpen] = useState(false);
 
   // Fetch real stories from GET /api/news
   const fetchNews = async (forceRefresh = false) => {
@@ -65,6 +78,21 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsScanning(false);
       setIsLoading(false);
+    }
+  };
+
+  // Fetch Event Clusters from GET /api/events
+  const fetchEventClusters = async (forceRefresh = false) => {
+    try {
+      const url = forceRefresh ? '/api/events?refresh=true' : '/api/events';
+      const res = await fetch(url);
+      if (res.ok) {
+        const data = await res.json();
+        setEventClusters(data.clusters || []);
+        setClusterTelemetry(data.telemetry || null);
+      }
+    } catch (err: unknown) {
+      console.error('[PulseContext] Failed to fetch event clusters:', err);
     }
   };
 
@@ -92,12 +120,18 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
         totalStoriesProcessed: data.totalStoriesProcessed,
         totalSelected: data.totalSelected,
         agentTelemetry: data.agentTelemetry || [],
-        intelligence: data.intelligence || []
+        intelligence: data.intelligence || [],
+        eventClusters: data.eventClusters || []
       });
 
       setScoutIntelligence(data.intelligence || []);
+      if (Array.isArray(data.eventClusters)) {
+        setEventClusters(data.eventClusters);
+      }
+      if (data.clusterTelemetry) {
+        setClusterTelemetry(data.clusterTelemetry);
+      }
 
-      // Append real execution activity logs
       if (Array.isArray(data.activityLogs)) {
         setActivityLogs((prev) => [...data.activityLogs, ...prev.slice(0, 30)]);
       }
@@ -106,39 +140,36 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Scout run error';
       console.error('[PulseContext] Scout scan failed:', err);
-      setActivityLogs((prev) => [
-        {
-          id: `log-err-${Date.now()}`,
-          timestamp: 'Just now',
-          agentId: 'orchestrator',
-          agentName: 'Scout Orchestrator',
-          message: `Scout run failed: ${msg}`,
-          type: 'error'
-        },
-        ...prev
-      ]);
     } finally {
       setIsScanning(false);
     }
   };
 
-  // Fetch initial news and run initial scout execution on mount
+  // Fetch initial news, clusters, and run initial scout execution on mount
   useEffect(() => {
     let isMounted = true;
 
     async function loadInitial() {
       try {
-        const res = await fetch('/api/news');
-        if (!res.ok) throw new Error(`API HTTP Error ${res.status}`);
-        const data = await res.json();
-
-        if (isMounted) {
-          setStories(data.stories || []);
-          setSourceStatus(data.sourceStatus || []);
-          setLastScanTime('Just now');
+        const res = await fetch('/api/events');
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted) {
+            setEventClusters(data.clusters || []);
+            setClusterTelemetry(data.telemetry || null);
+          }
         }
 
-        // Trigger initial scout run
+        const newsRes = await fetch('/api/news');
+        if (newsRes.ok) {
+          const newsData = await newsRes.json();
+          if (isMounted) {
+            setStories(newsData.stories || []);
+            setSourceStatus(newsData.sourceStatus || []);
+          }
+        }
+
+        // Initial Scout run
         const scoutRes = await fetch('/api/agents/scout', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -156,9 +187,16 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
             totalStoriesProcessed: scoutData.totalStoriesProcessed,
             totalSelected: scoutData.totalSelected,
             agentTelemetry: scoutData.agentTelemetry || [],
-            intelligence: scoutData.intelligence || []
+            intelligence: scoutData.intelligence || [],
+            eventClusters: scoutData.eventClusters || []
           });
           setScoutIntelligence(scoutData.intelligence || []);
+          if (Array.isArray(scoutData.eventClusters)) {
+            setEventClusters(scoutData.eventClusters);
+          }
+          if (scoutData.clusterTelemetry) {
+            setClusterTelemetry(scoutData.clusterTelemetry);
+          }
           if (Array.isArray(scoutData.activityLogs)) {
             setActivityLogs((prev) => [...scoutData.activityLogs, ...prev.slice(0, 30)]);
           }
@@ -215,6 +253,7 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
 
   const triggerManualScan = () => {
     fetchNews(true);
+    fetchEventClusters(true);
     triggerScoutScan();
   };
 
@@ -240,7 +279,13 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
         isScanning,
         isLoading,
         executionResult,
-        scoutIntelligence
+        scoutIntelligence,
+        eventClusters,
+        clusterTelemetry,
+        selectedCluster,
+        setSelectedCluster,
+        isClusterDetailOpen,
+        setIsClusterDetailOpen
       }}
     >
       {children}
