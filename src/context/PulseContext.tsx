@@ -139,7 +139,7 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
       setLastScanTime('Just now');
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Scout run error';
-      console.error('[PulseContext] Scout scan failed:', err);
+      console.error('[PulseContext] Scout scan failed:', msg);
     } finally {
       setIsScanning(false);
     }

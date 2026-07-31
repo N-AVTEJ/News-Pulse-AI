@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Clock, ExternalLink, Globe, Sparkles } from 'lucide-react';
+import { Clock, ExternalLink, Globe } from 'lucide-react';
 import { NewsStory } from '@/lib/news/types';
 
 interface EventTimelineProps {

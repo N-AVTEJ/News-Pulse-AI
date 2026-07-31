@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateStorySimilarity, calculateJaccardSimilarity } from '../similarityEngine';
+import { calculateStorySimilarity } from '../similarityEngine';
 import { NewsStory } from '../../news/types';
 
 describe('Similarity Engine & Score Calculator', () => {
