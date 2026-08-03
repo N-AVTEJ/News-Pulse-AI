@@ -4,6 +4,8 @@ import React from 'react';
 import { X, AlertTriangle, Layers, Cpu } from 'lucide-react';
 import { EventCluster } from '@/lib/clustering/types';
 import EventTimelineComponent from './EventTimelineComponent';
+import VerificationPanel from './VerificationPanel';
+import EvidenceGraphVisualizer from './EvidenceGraphVisualizer';
 
 interface EventDetailModalProps {
   cluster: EventCluster | null;
@@ -54,9 +56,15 @@ export default function EventDetailModal({ cluster, isOpen, onClose }: EventDeta
         <div className="p-3.5 rounded-lg bg-amber-500/10 border border-amber-500/20 text-amber-300 text-xs flex items-start gap-2.5 leading-relaxed">
           <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
           <div>
-            <strong className="text-amber-200 uppercase font-bold">Cluster &ne; Verification Notice:</strong> Multiple publishers reporting on the same event indicates widespread media coverage. It does NOT independently prove factual truth without multi-agent cross-verification (Phase 5+).
+            <strong className="text-amber-200 uppercase font-bold">Cluster &ne; Verification Notice:</strong> Multiple publishers reporting on the same event indicates widespread media coverage. It does NOT independently prove factual truth without multi-agent cross-verification.
           </div>
         </div>
+
+        {/* Phase 5 Deterministic Verification Panel */}
+        <VerificationPanel verification={cluster.verificationResult} />
+
+        {/* Phase 5 Evidence Graph Visualizer */}
+        <EvidenceGraphVisualizer graph={cluster.evidenceGraph} />
 
         {/* Cluster Summary */}
         {cluster.summary && (
