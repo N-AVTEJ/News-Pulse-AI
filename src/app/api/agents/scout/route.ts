@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { ingestNews } from '@/lib/news/ingest';
 import { clusterStories } from '@/lib/clustering/clusterEngine';
+import { verifyAllClusters } from '@/lib/verification/engine';
 import { runScoutOrchestratorForClusters } from '@/lib/agents/orchestrator';
 import { getLatestExecution, recordExecutionResult } from '@/lib/agents/telemetry/executionTracker';
 
@@ -16,12 +17,15 @@ export async function POST(request: NextRequest) {
     // 2. Perform deterministic story clustering (Phase 4)
     const { clusters, telemetry: clusterTelemetry } = clusterStories(ingestion.stories);
 
-    // 3. Execute Scout Orchestrator concurrently over EventClusters
-    const { executionResult, enrichedClusters } = await runScoutOrchestratorForClusters(clusters, {
+    // 3. Perform deterministic Verification & Evidence Graph building (Phase 5)
+    const { verifiedClusters, telemetry: verificationTelemetry } = verifyAllClusters(clusters);
+
+    // 4. Execute Scout Orchestrator concurrently over verified EventClusters (Phase 3)
+    const { executionResult, enrichedClusters } = await runScoutOrchestratorForClusters(verifiedClusters, {
       minCandidateScore: minScore
     });
 
-    // 4. Record runtime telemetry and generate real activity logs
+    // 5. Record runtime telemetry and generate real activity logs
     const activityLogs = recordExecutionResult(executionResult);
 
     return NextResponse.json({
@@ -36,6 +40,7 @@ export async function POST(request: NextRequest) {
       intelligence: executionResult.intelligence,
       eventClusters: enrichedClusters,
       clusterTelemetry,
+      verificationTelemetry,
       activityLogs
     }, { status: 200 });
 
@@ -43,7 +48,7 @@ export async function POST(request: NextRequest) {
     const errorMsg = error instanceof Error ? error.message : 'Unknown orchestrator error';
     console.error('[API Error] POST /api/agents/scout failed:', error);
     return NextResponse.json(
-      { error: 'Failed to execute Scout Orchestrator on event clusters.', details: errorMsg },
+      { error: 'Failed to execute Scout Orchestrator on verified event clusters.', details: errorMsg },
       { status: 500 }
     );
   }
