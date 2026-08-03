@@ -1,10 +1,11 @@
 'use client';
 
 import React from 'react';
-import { Layers, Activity, RefreshCw, Sparkles } from 'lucide-react';
+import { Layers, Activity, RefreshCw, Sparkles, ShieldCheck } from 'lucide-react';
 import { usePulse } from '@/context/PulseContext';
 import EventClusterCard from '@/components/EventClusterCard';
 import EventClusterVisualizer from '@/components/EventClusterVisualizer';
+import VerificationMetricCards from '@/components/VerificationMetricCards';
 import EventDetailModal from '@/components/EventDetailModal';
 import ActivityFeed from '@/components/ActivityFeed';
 import SourceStatusAlert from '@/components/SourceStatusAlert';
@@ -14,6 +15,7 @@ export default function OverviewPage() {
   const { 
     eventClusters, 
     clusterTelemetry, 
+    verificationTelemetry,
     sourceStatus, 
     activityLogs, 
     searchQuery, 
@@ -22,14 +24,22 @@ export default function OverviewPage() {
     selectedCluster,
     setSelectedCluster,
     isClusterDetailOpen,
-    setIsClusterDetailOpen
+    setIsClusterDetailOpen,
+    verificationStatusFilter,
+    setVerificationStatusFilter
   } = usePulse();
 
   const filteredClusters = eventClusters.filter((cluster) => {
-    return searchQuery === '' ||
+    // 1. Verification status filter
+    const matchesStatus = verificationStatusFilter === 'ALL' || cluster.verificationResult?.verificationStatus === verificationStatusFilter;
+
+    // 2. Global search query
+    const matchesSearch = searchQuery === '' ||
       cluster.canonicalHeadline.toLowerCase().includes(searchQuery.toLowerCase()) ||
       cluster.summary.toLowerCase().includes(searchQuery.toLowerCase()) ||
       cluster.publishers.some(p => p.toLowerCase().includes(searchQuery.toLowerCase()));
+
+    return matchesStatus && matchesSearch;
   });
 
   const handleSelectCluster = (cluster: EventCluster) => {
@@ -47,11 +57,11 @@ export default function OverviewPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-900 pb-4 gap-4 font-mono">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-zinc-100 flex items-center gap-2">
-            <Layers className="w-5 h-5 text-indigo-400" />
-            INTELLIGENCE EVENT CLUSTERS
+            <ShieldCheck className="w-5 h-5 text-emerald-400" />
+            VERIFIED EVENT INTELLIGENCE COMMAND CENTER
           </h1>
           <p className="text-xs text-zinc-500">
-            DETERMINISTIC CLUSTERING ENGINE // MULTI-PUBLISHER EVENT TIMELINES
+            DETERMINISTIC VERIFICATION ENGINE // EVIDENCE GRAPH RELATIONAL TOPOLOGY
           </p>
         </div>
 
@@ -61,9 +71,16 @@ export default function OverviewPage() {
           className="flex items-center gap-2 px-4 py-2 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-xs font-bold text-zinc-200 transition-all shrink-0"
         >
           <RefreshCw className={`w-3.5 h-3.5 ${isScanning ? 'animate-spin' : ''}`} />
-          <span>{isScanning ? 'INGESTING & CLUSTERING...' : 'SCAN & RE-CLUSTER'}</span>
+          <span>{isScanning ? 'VERIFYING & CLUSTERING...' : 'SCAN & RE-VERIFY'}</span>
         </button>
       </div>
+
+      {/* Phase 5 Verification Metrics */}
+      <VerificationMetricCards
+        telemetry={verificationTelemetry}
+        activeStatusFilter={verificationStatusFilter}
+        onSelectStatusFilter={setVerificationStatusFilter}
+      />
 
       {/* Clustering Telemetry Visualizer */}
       <EventClusterVisualizer telemetry={clusterTelemetry} />
@@ -73,12 +90,20 @@ export default function OverviewPage() {
         
         {/* Left 2 Columns: Event Clusters Feed */}
         <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between border-b border-zinc-900 pb-2 font-mono">
+          <div className="flex items-center justify-between border-b border-zinc-900 pb-2 font-mono flex-wrap gap-2">
             <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-300 flex items-center gap-1.5">
               <Activity className="w-4 h-4 text-indigo-400" />
-              Unified Event Clusters ({filteredClusters.length})
+              Verified Event Clusters ({filteredClusters.length})
             </h2>
-            <span className="text-[10px] text-zinc-500">SORTED BY LATEST REPORT</span>
+            
+            {verificationStatusFilter !== 'ALL' && (
+              <button
+                onClick={() => setVerificationStatusFilter('ALL')}
+                className="text-[10px] text-indigo-400 hover:underline font-bold"
+              >
+                Clear Filter ({verificationStatusFilter})
+              </button>
+            )}
           </div>
 
           {isScanning ? (
@@ -94,9 +119,9 @@ export default function OverviewPage() {
           ) : filteredClusters.length === 0 ? (
             <div className="flex flex-col items-center justify-center border border-dashed border-zinc-800 rounded-lg py-16 px-4 bg-zinc-900/5 text-center font-mono">
               <Sparkles className="w-6 h-6 text-zinc-600 mb-2 opacity-50" />
-              <h3 className="text-sm font-semibold text-zinc-400">No Event Clusters Found</h3>
+              <h3 className="text-sm font-semibold text-zinc-400">No Verified Event Clusters Match Filter</h3>
               <p className="text-xs text-zinc-500 mt-1 max-w-sm">
-                Execute a fresh scan to ingest real Phase 2 feeds and generate event clusters.
+                Try selecting a different verification status filter or execute a fresh scan across real Phase 2 feeds.
               </p>
             </div>
           ) : (

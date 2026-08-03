@@ -5,6 +5,7 @@ import { Agent, ActivityLog, mockAgents, mockActivityLogs } from '@/data/mockDat
 import { NewsStory, SourceStatus } from '@/lib/news/types';
 import { MergedIntelligenceStory, OrchestratorExecutionResult } from '@/lib/agents/types';
 import { ClusteringTelemetry, EventCluster } from '@/lib/clustering/types';
+import { VerificationTelemetry } from '@/lib/verification/types';
 
 interface PulseContextType {
   stories: NewsStory[];
@@ -28,13 +29,16 @@ interface PulseContextType {
   executionResult: OrchestratorExecutionResult | null;
   scoutIntelligence: MergedIntelligenceStory[];
   
-  // Phase 4 Event Clustering State
+  // Phase 4 & 5 State
   eventClusters: EventCluster[];
   clusterTelemetry: ClusteringTelemetry | null;
+  verificationTelemetry: VerificationTelemetry | null;
   selectedCluster: EventCluster | null;
   setSelectedCluster: (cluster: EventCluster | null) => void;
   isClusterDetailOpen: boolean;
   setIsClusterDetailOpen: (isOpen: boolean) => void;
+  verificationStatusFilter: string;
+  setVerificationStatusFilter: (status: string) => void;
 }
 
 const PulseContext = createContext<PulseContextType | undefined>(undefined);
@@ -52,13 +56,15 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
   const [isScanning, setIsScanning] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Phase 3 & 4 State
+  // Phase 3, 4, 5 State
   const [executionResult, setExecutionResult] = useState<OrchestratorExecutionResult | null>(null);
   const [scoutIntelligence, setScoutIntelligence] = useState<MergedIntelligenceStory[]>([]);
   const [eventClusters, setEventClusters] = useState<EventCluster[]>([]);
   const [clusterTelemetry, setClusterTelemetry] = useState<ClusteringTelemetry | null>(null);
+  const [verificationTelemetry, setVerificationTelemetry] = useState<VerificationTelemetry | null>(null);
   const [selectedCluster, setSelectedCluster] = useState<EventCluster | null>(null);
   const [isClusterDetailOpen, setIsClusterDetailOpen] = useState(false);
+  const [verificationStatusFilter, setVerificationStatusFilter] = useState<string>('ALL');
 
   // Fetch real stories from GET /api/news
   const fetchNews = async (forceRefresh = false) => {
@@ -131,6 +137,9 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
       if (data.clusterTelemetry) {
         setClusterTelemetry(data.clusterTelemetry);
       }
+      if (data.verificationTelemetry) {
+        setVerificationTelemetry(data.verificationTelemetry);
+      }
 
       if (Array.isArray(data.activityLogs)) {
         setActivityLogs((prev) => [...data.activityLogs, ...prev.slice(0, 30)]);
@@ -196,6 +205,9 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
           }
           if (scoutData.clusterTelemetry) {
             setClusterTelemetry(scoutData.clusterTelemetry);
+          }
+          if (scoutData.verificationTelemetry) {
+            setVerificationTelemetry(scoutData.verificationTelemetry);
           }
           if (Array.isArray(scoutData.activityLogs)) {
             setActivityLogs((prev) => [...scoutData.activityLogs, ...prev.slice(0, 30)]);
@@ -282,10 +294,13 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
         scoutIntelligence,
         eventClusters,
         clusterTelemetry,
+        verificationTelemetry,
         selectedCluster,
         setSelectedCluster,
         isClusterDetailOpen,
-        setIsClusterDetailOpen
+        setIsClusterDetailOpen,
+        verificationStatusFilter,
+        setVerificationStatusFilter
       }}
     >
       {children}

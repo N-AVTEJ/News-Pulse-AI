@@ -16,78 +16,62 @@ NewsPulse AI is an autonomous multi-agent news intelligence platform designed to
                        DEDUPLICATED STORIES
                                 │
                                 ▼
-                     STORY CLUSTERING ENGINE
+                     STORY CLUSTERING ENGINE (Phase 4)
                                 │
                                 ▼
-                         EVENT CLUSTERS
+                     VERIFICATION ENGINE (Phase 5)
                                 │
                                 ▼
-                       SCOUT ORCHESTRATOR
-                                │
-        +-----------------------+-----------------------+
-        │                       │                       │
-        v                       v                       v
-  AI & TECH SCOUT        BUSINESS SCOUT            WORLD SCOUT
-        │                       │                       │
-        +-----------------------+-----------------------+
+                        EVIDENCE GRAPH (Phase 5)
                                 │
                                 ▼
-                       SCOUT INTELLIGENCE
+                       SCOUT ORCHESTRATOR (Phase 3)
                                 │
                                 ▼
-                 EVENT DASHBOARD & TIMELINES (UI)
+                 VERIFICATION DASHBOARD & UI PANELS
 ```
 
 ---
 
-## 🎯 Phase 4: Story Clustering & Event Intelligence
+## 🛡 Phase 5: Verification Engine & Evidence Graph
 
-Phase 4 transforms NewsPulse AI from listing isolated single articles into a unified **Event Intelligence Platform**. Related articles reporting on the same real-world event across multiple publishers are grouped deterministically into an **EventCluster**.
+Phase 5 builds a deterministic **Verification Engine & Evidence Graph** that evaluates `EventCluster` objects using transparent engineering rules to measure corroboration structure, source diversity, primary evidence presence, and publication consistency.
 
-### 1. Deterministic Similarity Scoring Engine (`src/lib/clustering/similarityEngine.ts`)
-Calculates a 0–100 similarity score between stories without LLMs or embeddings:
-- **Headline Overlap (0–40 pts)**: Token Jaccard index + n-gram overlap on normalized headlines (after stripping stop words, punctuation, unicode quotes, and possessives).
-- **Entity Overlap (0–30 pts)**: Shared organization names, product names, locations (e.g. OpenAI, ChatGPT, Nvidia, Microsoft, EU, TSMC).
-- **Publication Time Proximity (0–20 pts)**:
-  - $\le 6\text{h}$: +20 pts
-  - $\le 12\text{h}$: +15 pts
-  - $\le 24\text{h}$: +10 pts
-  - $> 24\text{h}$: 0 pts
-- **Category Domain Alignment (0–10 pts)**: +10 pts if categories match.
-- **Clustering Threshold**: Configurable `minSimilarityThreshold` (default: `50`). If similarity $\ge 50$, stories are grouped into an `EventCluster`.
+### 1. Verification Status Definitions (`src/lib/verification/types.ts`)
+- `STRONG_CORROBORATION`: 3+ independent publishers OR 2+ independent publishers with primary evidence.
+- `LIMITED_CORROBORATION`: 2 independent publishers OR 1 publisher with primary source evidence.
+- `INSUFFICIENT_EVIDENCE`: Single secondary publisher report without primary source backing.
+- `CONFLICTING_REPORTS`: Contradictory monetary figures, headcount numbers, or conflicting statements detected across outlets.
+- `PENDING` / `UNASSESSED`: Verification in progress.
 
-### 2. Canonical Headline & Summary (`src/lib/clustering/canonicalHeadline.ts`)
-- **Canonical Headline**: Selected deterministically based on longest descriptive headline length (7–20 words) from the earliest reporting publisher.
-- **Event Summary**: Extracted from the earliest published story in the cluster.
+> ⚠️ **Critical Disclaimer**: Verification statuses represent **evidence quality & corroboration structure ONLY**. They are **NEVER** presented as truth labels. Corroboration is not proof of truth.
 
-### 3. Chronological Event Timeline (`src/components/EventTimelineComponent.tsx`)
-- Displays the chronological progression of news reports (earliest report $\rightarrow$ latest update).
-- Preserves all publisher attributions and direct article links (`target="_blank"`).
+### 2. Source Classification Registry (`src/lib/verification/sourceClassification.ts`)
+Classifies publisher endpoints into primary evidence vs secondary reporting:
+- **Primary Sources**: `GOVERNMENT` (`.gov`), `ACADEMIC` (`.edu`, `arxiv.org`), `COMPANY_BLOG` (`blog.google`, `openai.com/index`, `newsroom.apple.com`), `OFFICIAL_ORG`.
+- **Secondary Sources**: `WIRE_SERVICE` (Reuters, AP, AFP), `NEWS_ORG` (BBC, CNBC, NPR), `INDUSTRY_PUB` (Ars Technica, TechCrunch, Wired).
 
-### 4. Scout Integration for Event Clusters (`src/lib/agents/orchestrator.ts`)
-- Runtime Scouts (`AI & Tech Scout`, `Business Scout`, `World News Scout`) evaluate `EventCluster` objects concurrently using `Promise.allSettled()`.
-- Multiple Scouts matching the same event are displayed as `"Detected by X Scouts"`.
+### 3. Claim Matching & Conflict Detection (`src/lib/verification/claimMatcher.ts`)
+- **Numerical Claim Extraction**: Extracts dollar amounts (`$4.5M` vs `$45M`) and headcount figures (`500 layoffs` vs `5,000 layoffs`).
+- **Conflict Flagging**: If contradictory numbers differ by ratio $\ge 1.5$ across publishers, flags `CONFLICTING_REPORTS` and records conflicting stories.
 
-> ⚠️ **Cluster &ne; Verification Notice**:  
-> Multiple publishers reporting on the same event indicates widespread media coverage. It does NOT independently prove factual truth without multi-agent cross-verification (Phase 5+).
+### 4. Evidence Graph Engine (`src/lib/verification/evidenceGraph.ts`)
+Constructs an internal graph model:
+- **Nodes**: `CLUSTER` (center), `PRIMARY_SOURCE`, `SECONDARY_SOURCE`, `STORY`, `ENTITY`.
+- **Edges**: `REPORTED_BY`, `CITES_PRIMARY`, `CONFLICTS_WITH`, `ASSOCIATED_ENTITY`.
 
 ---
 
 ## 📌 API Reference
 
+### `GET /api/verification/[clusterId]`
+Returns verification result, evidence graph nodes/edges, supporting sources, rule reasons, and evidence timeline.
+
 ### `GET /api/events`
-Returns all active Event Clusters and clustering telemetry stats.
-
-Query parameters:
-- `category`: Filter by category (`ai-tech`, `business`, `world`).
-- `minSimilarity`: Minimum similarity threshold (default: `50`).
-- `refresh`: Force fresh ingestion scan (`true`).
-
-### `GET /api/events/[id]`
-Returns single Event Cluster details matching `[id]`.
+Returns all active Event Clusters, clustering telemetry, and verification results.
 
 ### `POST /api/agents/scout`
-Triggers Phase 2 ingestion $\rightarrow$ Phase 4 story clustering $\rightarrow$ Phase 3 Scout Orchestrator. Returns `{ executionId, status, durationMs, agentTelemetry, intelligence, eventClusters, clusterTelemetry }`.
+Triggers Phase 2 ingestion $\rightarrow$ Phase 4 story clustering $\rightarrow$ Phase 5 Verification Engine $\rightarrow$ Phase 3 Scout Orchestrator. Returns `{ executionId, status, durationMs, agentTelemetry, intelligence, eventClusters, clusterTelemetry, verificationTelemetry }`.
 
 ---
 
@@ -95,7 +79,7 @@ Triggers Phase 2 ingestion $\rightarrow$ Phase 4 story clustering $\rightarrow$ 
 
 ### Run Tests
 ```bash
-# Run Vitest test suite (Unit & Integration tests)
+# Run Vitest test suite (40 Unit & Integration tests)
 npx vitest run
 ```
 
@@ -113,4 +97,4 @@ npm run build
 # Start local production server
 npm run start
 ```
-Open [http://localhost:3000](http://localhost:3000) to view the Event Intelligence Command Dashboard.
+Open [http://localhost:3000](http://localhost:3000) to view the Verified Event Intelligence Command Center.
