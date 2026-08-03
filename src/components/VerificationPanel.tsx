@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ShieldCheck, AlertTriangle, FileText, CheckCircle2, Globe, ExternalLink, Info } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, FileText, CheckCircle2, Globe, ExternalLink } from 'lucide-react';
 import { VerificationResult, VerificationStatus } from '@/lib/verification/types';
 
 interface VerificationPanelProps {

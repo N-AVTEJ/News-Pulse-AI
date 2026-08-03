@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ShieldCheck, AlertTriangle, ShieldAlert, FileText, CheckCircle2 } from 'lucide-react';
+import { ShieldCheck, AlertTriangle, FileText, CheckCircle2 } from 'lucide-react';
 import { VerificationTelemetry } from '@/lib/verification/types';
 
 interface VerificationMetricCardsProps {

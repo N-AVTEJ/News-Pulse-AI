@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { GitBranch, Shield, Globe, Layers, AlertTriangle } from 'lucide-react';
+import { GitBranch } from 'lucide-react';
 import { EvidenceGraph } from '@/lib/verification/types';
 
 interface EvidenceGraphVisualizerProps {
@@ -11,7 +11,6 @@ interface EvidenceGraphVisualizerProps {
 export default function EvidenceGraphVisualizer({ graph }: EvidenceGraphVisualizerProps) {
   if (!graph || !graph.nodes || graph.nodes.length === 0) return null;
 
-  const clusterNode = graph.nodes.find((n) => n.type === 'CLUSTER');
   const sourceNodes = graph.nodes.filter((n) => n.type === 'PRIMARY_SOURCE' || n.type === 'SECONDARY_SOURCE');
   const entityNodes = graph.nodes.filter((n) => n.type === 'ENTITY');
 
