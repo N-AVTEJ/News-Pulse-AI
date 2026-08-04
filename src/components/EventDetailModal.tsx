@@ -6,6 +6,7 @@ import { EventCluster } from '@/lib/clustering/types';
 import EventTimelineComponent from './EventTimelineComponent';
 import VerificationPanel from './VerificationPanel';
 import EvidenceGraphVisualizer from './EvidenceGraphVisualizer';
+import AiReportPanel from './AiReportPanel';
 
 interface EventDetailModalProps {
   cluster: EventCluster | null;
@@ -59,6 +60,11 @@ export default function EventDetailModal({ cluster, isOpen, onClose }: EventDeta
             <strong className="text-amber-200 uppercase font-bold">Cluster &ne; Verification Notice:</strong> Multiple publishers reporting on the same event indicates widespread media coverage. It does NOT independently prove factual truth without multi-agent cross-verification.
           </div>
         </div>
+
+        {/* Phase 6 Evidence-Grounded AI Intelligence Analysis Report */}
+        {cluster.analysisReport && (
+          <AiReportPanel report={cluster.analysisReport} />
+        )}
 
         {/* Phase 5 Deterministic Verification Panel */}
         <VerificationPanel verification={cluster.verificationResult} />
