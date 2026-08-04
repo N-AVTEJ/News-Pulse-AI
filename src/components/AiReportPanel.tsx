@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Sparkles, ShieldAlert, CheckCircle2, AlertTriangle, ExternalLink, Globe, Cpu, ArrowRight } from 'lucide-react';
+import { Sparkles, CheckCircle2, AlertTriangle, ExternalLink, Globe, Cpu } from 'lucide-react';
 import { AnalysisReport } from '@/lib/analysis/types';
 import EntityRelationshipGraph from './EntityRelationshipGraph';
 

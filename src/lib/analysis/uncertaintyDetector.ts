@@ -7,7 +7,6 @@ import { UncertaintyDetail } from './types';
 export function detectUncertainties(cluster: EventCluster): UncertaintyDetail[] {
   const uncertainties: UncertaintyDetail[] = [];
   const ver = cluster.verificationResult;
-  const stories = cluster.stories || [];
 
   // 1. Missing Primary Source
   if (!ver?.primarySources || ver.primarySources.length === 0) {

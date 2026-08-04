@@ -119,7 +119,7 @@ export function extractEntityRelationships(
 
     let predicate = 'associated with';
     if (e1.category === 'COMPANY' && e2.category === 'PRODUCT') predicate = 'released';
-    else if (e1.category === 'COMPANY' && e2.category === 'COMPANY') fontPredicateCheck(cluster.canonicalHeadline, e1.name, e2.name);
+    else if (e1.category === 'COMPANY' && e2.category === 'COMPANY') predicate = fontPredicateCheck(cluster.canonicalHeadline);
     else if (e1.category === 'PERSON' && e2.category === 'COMPANY') predicate = 'leads';
     else if (e1.category === 'GOVERNMENT' && e2.category === 'COMPANY') predicate = 'regulates';
 
