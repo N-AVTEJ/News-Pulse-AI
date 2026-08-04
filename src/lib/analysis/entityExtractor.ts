@@ -135,7 +135,7 @@ export function extractEntityRelationships(
   return relationships;
 }
 
-function fontPredicateCheck(headline: string, name1: string, name2: string): string {
+function fontPredicateCheck(headline: string): string {
   const hLower = headline.toLowerCase();
   if (hLower.includes('acquire') || hLower.includes('buy') || hLower.includes('merge')) return 'merged with / acquired';
   if (hLower.includes('partner') || hLower.includes('deal')) return 'partnered with';
