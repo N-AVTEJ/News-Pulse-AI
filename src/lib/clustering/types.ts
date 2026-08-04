@@ -1,5 +1,6 @@
 import { NewsCategory, NewsStory } from '../news/types';
 import { EvidenceGraph, VerificationResult } from '../verification/types';
+import { AnalysisReport } from '../analysis/types';
 
 export interface SimilarityBreakdown {
   headlineSimilarity: number; // 0 - 40 pts
@@ -32,6 +33,7 @@ export interface EventCluster {
   verificationScore: null;       // Reserved for future Phase
   verificationResult?: VerificationResult;
   evidenceGraph?: EvidenceGraph;
+  analysisReport?: AnalysisReport;
 }
 
 export interface ClusterConfig {
