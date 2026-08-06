@@ -1,4 +1,3 @@
-import { EventCluster } from '../clustering/types';
 import { ClusterChangeDelta } from './changeDetector';
 import { NotificationItem, UserNotificationPreferences } from './types';
 
