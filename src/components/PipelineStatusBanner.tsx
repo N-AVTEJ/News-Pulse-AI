@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { Play, Cpu, Clock, Activity, Bell, Shield, Layers } from 'lucide-react';
-import { HealthMetrics, PipelineRun } from '@/lib/runtime/types';
+import { Play, Activity, Bell } from 'lucide-react';
+import { HealthMetrics } from '@/lib/runtime/types';
 
 interface PipelineStatusBannerProps {
   health?: HealthMetrics | null;
@@ -21,7 +21,6 @@ export default function PipelineStatusBanner({
   onOpenNotifications,
   unreadNotificationsCount
 }: PipelineStatusBannerProps) {
-  const schedulerActive = health?.schedulerActive ?? true;
   const schedulerMode = health?.schedulerMode || 'INTERVAL';
   const workersActive = health?.workersActive || 0;
   const queueLength = health?.queueLength || 0;

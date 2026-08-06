@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Activity, Search, ShieldCheck, Cpu, AlertTriangle, RefreshCw } from 'lucide-react';
+import { X, Activity, Search, RefreshCw } from 'lucide-react';
 import { HealthMetrics, PipelineRun } from '@/lib/runtime/types';
 
 interface HealthMonitorPanelProps {
@@ -15,26 +15,35 @@ export default function HealthMonitorPanel({ isOpen, onClose, health }: HealthMo
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchHistory = async (query = '') => {
-    setIsLoading(true);
-    try {
-      const url = query ? `/api/runtime/history?q=${encodeURIComponent(query)}` : '/api/runtime/history';
-      const res = await fetch(url);
-      if (res.ok) {
-        const data = await res.json();
-        setHistory(data.history || []);
-      }
-    } catch (err: unknown) {
-      console.error('[HealthMonitorPanel] Failed to fetch history:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    if (isOpen) {
-      fetchHistory(searchQuery);
+    if (!isOpen) return;
+    let isMounted = true;
+
+    async function loadHistory() {
+      setIsLoading(true);
+      try {
+        const url = searchQuery ? `/api/runtime/history?q=${encodeURIComponent(searchQuery)}` : '/api/runtime/history';
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted) {
+            setHistory(data.history || []);
+          }
+        }
+      } catch (err: unknown) {
+        console.error('[HealthMonitorPanel] Failed to fetch history:', err);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
     }
+
+    loadHistory();
+
+    return () => {
+      isMounted = false;
+    };
   }, [isOpen, searchQuery]);
 
   if (!isOpen) return null;
