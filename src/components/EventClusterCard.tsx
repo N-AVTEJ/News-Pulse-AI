@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Layers, Globe, Clock, Shield, ChevronRight } from 'lucide-react';
+import { Layers, Globe, Clock, Shield, ChevronRight, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { EventCluster } from '@/lib/clustering/types';
 
 interface EventClusterCardProps {
@@ -11,6 +11,7 @@ interface EventClusterCardProps {
 
 export default function EventClusterCard({ cluster, onSelectCluster }: EventClusterCardProps) {
   const isMultiScout = cluster.matchedScouts.length > 1;
+  const breakingState = cluster.breakingState || 'DEVELOPING';
 
   const formattedLatestTime = (() => {
     try {
@@ -22,19 +23,60 @@ export default function EventClusterCard({ cluster, onSelectCluster }: EventClus
     }
   })();
 
+  const getBreakingBadge = (state: string) => {
+    switch (state) {
+      case 'BREAKING':
+        return {
+          label: 'BREAKING NEWS',
+          bg: 'bg-rose-500/10 border-rose-500/30 text-rose-400 animate-pulse',
+          icon: AlertTriangle
+        };
+      case 'CONFIRMED':
+        return {
+          label: 'CONFIRMED EVENT',
+          bg: 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400',
+          icon: CheckCircle2
+        };
+      case 'ARCHIVED':
+        return {
+          label: 'ARCHIVED',
+          bg: 'bg-zinc-900 border-zinc-800 text-zinc-500',
+          icon: Clock
+        };
+      case 'DEVELOPING':
+      default:
+        return {
+          label: 'DEVELOPING',
+          bg: 'bg-sky-500/10 border-sky-500/30 text-sky-400',
+          icon: Layers
+        };
+    }
+  };
+
+  const badge = getBreakingBadge(breakingState);
+  const BadgeIcon = badge.icon;
+
   return (
     <div 
       onClick={() => onSelectCluster(cluster)}
       className="group relative cursor-pointer overflow-hidden rounded-lg border border-zinc-800 bg-zinc-900/30 p-5 transition-all duration-300 hover:border-zinc-700 hover:bg-zinc-900/60 font-mono space-y-4"
     >
-      {/* Accent top border if multi-publisher */}
-      {cluster.publisherCount > 1 && (
+      {/* Accent top border if breaking or multi-publisher */}
+      {breakingState === 'BREAKING' ? (
+        <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-rose-500 via-amber-500 to-rose-500 animate-pulse"></div>
+      ) : cluster.publisherCount > 1 && (
         <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-indigo-500 via-sky-500 to-emerald-500"></div>
       )}
 
       {/* Header Badges */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap text-[10px]">
+          {/* Breaking Lifecycle Badge */}
+          <span className={`px-2 py-0.5 rounded font-bold uppercase border flex items-center gap-1 ${badge.bg}`}>
+            <BadgeIcon className="w-3 h-3" />
+            {badge.label}
+          </span>
+
           {/* Cluster Article Count Pill */}
           <span className="px-2 py-0.5 rounded font-bold uppercase bg-indigo-500/10 border border-indigo-500/20 text-indigo-300 flex items-center gap-1">
             <Layers className="w-3 h-3 text-indigo-400" />
