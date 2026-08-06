@@ -6,6 +6,7 @@ import { NewsStory, SourceStatus } from '@/lib/news/types';
 import { MergedIntelligenceStory, OrchestratorExecutionResult } from '@/lib/agents/types';
 import { ClusteringTelemetry, EventCluster } from '@/lib/clustering/types';
 import { VerificationTelemetry } from '@/lib/verification/types';
+import { HealthMetrics, NotificationItem } from '@/lib/runtime/types';
 
 interface PulseContextType {
   stories: NewsStory[];
@@ -29,7 +30,7 @@ interface PulseContextType {
   executionResult: OrchestratorExecutionResult | null;
   scoutIntelligence: MergedIntelligenceStory[];
   
-  // Phase 4 & 5 State
+  // Phase 4, 5, 6 Event Clusters & Verification State
   eventClusters: EventCluster[];
   clusterTelemetry: ClusteringTelemetry | null;
   verificationTelemetry: VerificationTelemetry | null;
@@ -39,6 +40,14 @@ interface PulseContextType {
   setIsClusterDetailOpen: (isOpen: boolean) => void;
   verificationStatusFilter: string;
   setVerificationStatusFilter: (status: string) => void;
+
+  // Phase 7 Autonomous Runtime State
+  healthMetrics: HealthMetrics | null;
+  notifications: NotificationItem[];
+  unreadNotificationsCount: number;
+  isRunningPipeline: boolean;
+  triggerAutonomousPipelineRun: () => Promise<void>;
+  markAllNotificationsAsRead: () => void;
 }
 
 const PulseContext = createContext<PulseContextType | undefined>(undefined);
@@ -56,7 +65,7 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
   const [isScanning, setIsScanning] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Phase 3, 4, 5 State
+  // Phase 3, 4, 5, 6 State
   const [executionResult, setExecutionResult] = useState<OrchestratorExecutionResult | null>(null);
   const [scoutIntelligence, setScoutIntelligence] = useState<MergedIntelligenceStory[]>([]);
   const [eventClusters, setEventClusters] = useState<EventCluster[]>([]);
@@ -65,6 +74,11 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
   const [selectedCluster, setSelectedCluster] = useState<EventCluster | null>(null);
   const [isClusterDetailOpen, setIsClusterDetailOpen] = useState(false);
   const [verificationStatusFilter, setVerificationStatusFilter] = useState<string>('ALL');
+
+  // Phase 7 Runtime State
+  const [healthMetrics, setHealthMetrics] = useState<HealthMetrics | null>(null);
+  const [notifications, setNotifications] = useState<NotificationItem[]>([]);
+  const [isRunningPipeline, setIsRunningPipeline] = useState(false);
 
   // Fetch real stories from GET /api/news
   const fetchNews = async (forceRefresh = false) => {
@@ -96,9 +110,53 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
         const data = await res.json();
         setEventClusters(data.clusters || []);
         setClusterTelemetry(data.telemetry || null);
+        setVerificationTelemetry(data.verificationTelemetry || null);
       }
     } catch (err: unknown) {
       console.error('[PulseContext] Failed to fetch event clusters:', err);
+    }
+  };
+
+  // Trigger Phase 7 Autonomous Pipeline Run via POST /api/runtime/run
+  const triggerAutonomousPipelineRun = async () => {
+    if (isRunningPipeline) return;
+    setIsRunningPipeline(true);
+
+    try {
+      const res = await fetch('/api/runtime/run', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refresh: true })
+      });
+
+      if (!res.ok) throw new Error(`Runtime Run HTTP Error ${res.status}`);
+
+      const data = await res.json();
+      if (Array.isArray(data.notifications)) {
+        setNotifications((prev) => [...data.notifications, ...prev]);
+      }
+
+      // Refresh event clusters and health
+      await fetchEventClusters();
+      await fetchRuntimeHealth();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Pipeline run error';
+      console.error('[PulseContext] Autonomous pipeline run failed:', msg);
+    } finally {
+      setIsRunningPipeline(false);
+    }
+  };
+
+  // Fetch runtime health from GET /api/runtime/health
+  const fetchRuntimeHealth = async () => {
+    try {
+      const res = await fetch('/api/runtime/health');
+      if (res.ok) {
+        const data = await res.json();
+        setHealthMetrics(data.health || null);
+      }
+    } catch (err: unknown) {
+      console.error('[PulseContext] Failed to fetch health metrics:', err);
     }
   };
 
@@ -160,12 +218,15 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
 
     async function loadInitial() {
       try {
+        await fetchRuntimeHealth();
+
         const res = await fetch('/api/events');
         if (res.ok) {
           const data = await res.json();
           if (isMounted) {
             setEventClusters(data.clusters || []);
             setClusterTelemetry(data.telemetry || null);
+            setVerificationTelemetry(data.verificationTelemetry || null);
           }
         }
 
@@ -175,42 +236,6 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
           if (isMounted) {
             setStories(newsData.stories || []);
             setSourceStatus(newsData.sourceStatus || []);
-          }
-        }
-
-        // Initial Scout run
-        const scoutRes = await fetch('/api/agents/scout', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ minScore: 40 })
-        });
-
-        if (scoutRes.ok && isMounted) {
-          const scoutData = await scoutRes.json();
-          setExecutionResult({
-            executionId: scoutData.executionId,
-            startedAt: scoutData.startedAt,
-            completedAt: scoutData.completedAt,
-            durationMs: scoutData.durationMs,
-            status: scoutData.status,
-            totalStoriesProcessed: scoutData.totalStoriesProcessed,
-            totalSelected: scoutData.totalSelected,
-            agentTelemetry: scoutData.agentTelemetry || [],
-            intelligence: scoutData.intelligence || [],
-            eventClusters: scoutData.eventClusters || []
-          });
-          setScoutIntelligence(scoutData.intelligence || []);
-          if (Array.isArray(scoutData.eventClusters)) {
-            setEventClusters(scoutData.eventClusters);
-          }
-          if (scoutData.clusterTelemetry) {
-            setClusterTelemetry(scoutData.clusterTelemetry);
-          }
-          if (scoutData.verificationTelemetry) {
-            setVerificationTelemetry(scoutData.verificationTelemetry);
-          }
-          if (Array.isArray(scoutData.activityLogs)) {
-            setActivityLogs((prev) => [...scoutData.activityLogs, ...prev.slice(0, 30)]);
           }
         }
       } catch (err: unknown) {
@@ -233,6 +258,10 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
     setSavedStories((prev) =>
       prev.includes(storyId) ? prev.filter((id) => id !== storyId) : [...prev, storyId]
     );
+  };
+
+  const markAllNotificationsAsRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   };
 
   const toggleAgentStatus = (agentId: string) => {
@@ -267,7 +296,10 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
     fetchNews(true);
     fetchEventClusters(true);
     triggerScoutScan();
+    triggerAutonomousPipelineRun();
   };
+
+  const unreadNotificationsCount = notifications.filter((n) => !n.read).length;
 
   return (
     <PulseContext.Provider
@@ -300,7 +332,13 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
         isClusterDetailOpen,
         setIsClusterDetailOpen,
         verificationStatusFilter,
-        setVerificationStatusFilter
+        setVerificationStatusFilter,
+        healthMetrics,
+        notifications,
+        unreadNotificationsCount,
+        isRunningPipeline,
+        triggerAutonomousPipelineRun,
+        markAllNotificationsAsRead
       }}
     >
       {children}
