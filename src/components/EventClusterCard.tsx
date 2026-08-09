@@ -3,6 +3,7 @@
 import React from 'react';
 import { Layers, Globe, Clock, Shield, ChevronRight, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { EventCluster } from '@/lib/clustering/types';
+import ExplainableRelevanceBadge from './ExplainableRelevanceBadge';
 
 interface EventClusterCardProps {
   cluster: EventCluster;
@@ -71,6 +72,12 @@ export default function EventClusterCard({ cluster, onSelectCluster }: EventClus
       {/* Header Badges */}
       <div className="flex items-center justify-between gap-2 flex-wrap">
         <div className="flex items-center gap-2 flex-wrap text-[10px]">
+          {/* Explainable Relevance Badge */}
+          <ExplainableRelevanceBadge
+            score={cluster.relevanceScore || 65}
+            reasons={cluster.matchReasons || ['Matched Category Preference']}
+          />
+
           {/* Breaking Lifecycle Badge */}
           <span className={`px-2 py-0.5 rounded font-bold uppercase border flex items-center gap-1 ${badge.bg}`}>
             <BadgeIcon className="w-3 h-3" />

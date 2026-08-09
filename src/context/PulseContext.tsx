@@ -7,6 +7,7 @@ import { MergedIntelligenceStory, OrchestratorExecutionResult } from '@/lib/agen
 import { ClusteringTelemetry, EventCluster } from '@/lib/clustering/types';
 import { VerificationTelemetry } from '@/lib/verification/types';
 import { HealthMetrics, NotificationItem } from '@/lib/runtime/types';
+import { DailyBriefing, RecommendationItem, UserProfile, WeeklyReport, Workspace, Watchlist } from '@/lib/personalization/types';
 
 interface PulseContextType {
   stories: NewsStory[];
@@ -48,6 +49,15 @@ interface PulseContextType {
   isRunningPipeline: boolean;
   triggerAutonomousPipelineRun: () => Promise<void>;
   markAllNotificationsAsRead: () => void;
+
+  // Phase 8 Personalization State
+  userProfile: UserProfile | null;
+  activeWorkspace: Workspace | null;
+  dailyBriefing: DailyBriefing | null;
+  weeklyReport: WeeklyReport | null;
+  recommendations: RecommendationItem[];
+  switchActiveWorkspace: (workspaceId: string) => Promise<void>;
+  createWatchlist: (watchlistData: Partial<Watchlist>) => Promise<void>;
 }
 
 const PulseContext = createContext<PulseContextType | undefined>(undefined);
@@ -80,6 +90,85 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
   const [notifications, setNotifications] = useState<NotificationItem[]>([]);
   const [isRunningPipeline, setIsRunningPipeline] = useState(false);
 
+  // Phase 8 Personalization State
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [activeWorkspace, setActiveWorkspace] = useState<Workspace | null>(null);
+  const [dailyBriefing, setDailyBriefing] = useState<DailyBriefing | null>(null);
+  const [weeklyReport, setWeeklyReport] = useState<WeeklyReport | null>(null);
+  const [recommendations, setRecommendations] = useState<RecommendationItem[]>([]);
+
+  // Fetch Personal Feed & Profile from APIs
+  const fetchPersonalization = async () => {
+    try {
+      const profRes = await fetch('/api/profile');
+      if (profRes.ok) {
+        const profData = await profRes.json();
+        setUserProfile(profData.profile || null);
+        setActiveWorkspace(profData.activeWorkspace || null);
+      }
+
+      const feedRes = await fetch('/api/feed');
+      if (feedRes.ok) {
+        const feedData = await feedRes.json();
+        if (Array.isArray(feedData.feed)) {
+          setEventClusters(feedData.feed);
+        }
+      }
+
+      const brfRes = await fetch('/api/briefings');
+      if (brfRes.ok) {
+        const brfData = await brfRes.json();
+        setDailyBriefing(brfData.dailyBriefing || null);
+        setWeeklyReport(brfData.weeklyReport || null);
+      }
+
+      const recRes = await fetch('/api/recommendations');
+      if (recRes.ok) {
+        const recData = await recRes.json();
+        setRecommendations(recData.recommendations || []);
+      }
+    } catch (err) {
+      console.error('[PulseContext] Personalization fetch failed:', err);
+    }
+  };
+
+  const switchActiveWorkspace = async (workspaceId: string) => {
+    try {
+      const res = await fetch('/api/profile', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ switchWorkspaceId: workspaceId })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setUserProfile(data.profile);
+        setActiveWorkspace(data.activeWorkspace);
+        await fetchPersonalization();
+      }
+    } catch (err) {
+      console.error('[PulseContext] Workspace switch failed:', err);
+    }
+  };
+
+  const createWatchlist = async (watchlistData: Partial<Watchlist>) => {
+    try {
+      const res = await fetch('/api/watchlists', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(watchlistData)
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (activeWorkspace) {
+          setActiveWorkspace({ ...activeWorkspace, watchlists: data.watchlists });
+        }
+        await fetchPersonalization();
+      }
+    } catch (err) {
+      console.error('[PulseContext] Create watchlist failed:', err);
+    }
+  };
+
   // Fetch real stories from GET /api/news
   const fetchNews = async (forceRefresh = false) => {
     setIsScanning(true);
@@ -98,22 +187,6 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
     } finally {
       setIsScanning(false);
       setIsLoading(false);
-    }
-  };
-
-  // Fetch Event Clusters from GET /api/events
-  const fetchEventClusters = async (forceRefresh = false) => {
-    try {
-      const url = forceRefresh ? '/api/events?refresh=true' : '/api/events';
-      const res = await fetch(url);
-      if (res.ok) {
-        const data = await res.json();
-        setEventClusters(data.clusters || []);
-        setClusterTelemetry(data.telemetry || null);
-        setVerificationTelemetry(data.verificationTelemetry || null);
-      }
-    } catch (err: unknown) {
-      console.error('[PulseContext] Failed to fetch event clusters:', err);
     }
   };
 
@@ -136,8 +209,7 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
         setNotifications((prev) => [...data.notifications, ...prev]);
       }
 
-      // Refresh event clusters and health
-      await fetchEventClusters();
+      await fetchPersonalization();
       await fetchRuntimeHealth();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Pipeline run error';
@@ -189,15 +261,7 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
       });
 
       setScoutIntelligence(data.intelligence || []);
-      if (Array.isArray(data.eventClusters)) {
-        setEventClusters(data.eventClusters);
-      }
-      if (data.clusterTelemetry) {
-        setClusterTelemetry(data.clusterTelemetry);
-      }
-      if (data.verificationTelemetry) {
-        setVerificationTelemetry(data.verificationTelemetry);
-      }
+      await fetchPersonalization();
 
       if (Array.isArray(data.activityLogs)) {
         setActivityLogs((prev) => [...data.activityLogs, ...prev.slice(0, 30)]);
@@ -205,7 +269,7 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
 
       setLastScanTime('Just now');
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : 'Scout run error';
+      const msg = err instanceof Error ? err.message : 'Scout scan error';
       console.error('[PulseContext] Scout scan failed:', msg);
     } finally {
       setIsScanning(false);
@@ -219,16 +283,7 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
     async function loadInitial() {
       try {
         await fetchRuntimeHealth();
-
-        const res = await fetch('/api/events');
-        if (res.ok) {
-          const data = await res.json();
-          if (isMounted) {
-            setEventClusters(data.clusters || []);
-            setClusterTelemetry(data.telemetry || null);
-            setVerificationTelemetry(data.verificationTelemetry || null);
-          }
-        }
+        await fetchPersonalization();
 
         const newsRes = await fetch('/api/news');
         if (newsRes.ok) {
@@ -294,7 +349,6 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
 
   const triggerManualScan = () => {
     fetchNews(true);
-    fetchEventClusters(true);
     triggerScoutScan();
     triggerAutonomousPipelineRun();
   };
@@ -338,7 +392,14 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
         unreadNotificationsCount,
         isRunningPipeline,
         triggerAutonomousPipelineRun,
-        markAllNotificationsAsRead
+        markAllNotificationsAsRead,
+        userProfile,
+        activeWorkspace,
+        dailyBriefing,
+        weeklyReport,
+        recommendations,
+        switchActiveWorkspace,
+        createWatchlist
       }}
     >
       {children}

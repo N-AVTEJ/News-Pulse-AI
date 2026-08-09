@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Activity, Sparkles, ShieldCheck } from 'lucide-react';
+import { Activity, Sparkles, ShieldCheck, User } from 'lucide-react';
 import { usePulse } from '@/context/PulseContext';
 import EventClusterCard from '@/components/EventClusterCard';
 import EventClusterVisualizer from '@/components/EventClusterVisualizer';
@@ -10,6 +10,10 @@ import EventDetailModal from '@/components/EventDetailModal';
 import PipelineStatusBanner from '@/components/PipelineStatusBanner';
 import NotificationsDrawer from '@/components/NotificationsDrawer';
 import HealthMonitorPanel from '@/components/HealthMonitorPanel';
+import WorkspaceSwitcher from '@/components/WorkspaceSwitcher';
+import PersonalDashboardWidgets from '@/components/PersonalDashboardWidgets';
+import WatchlistManager from '@/components/WatchlistManager';
+import BriefingModal from '@/components/BriefingModal';
 import ActivityFeed from '@/components/ActivityFeed';
 import SourceStatusAlert from '@/components/SourceStatusAlert';
 import { EventCluster } from '@/lib/clustering/types';
@@ -34,11 +38,20 @@ export default function OverviewPage() {
     unreadNotificationsCount,
     isRunningPipeline,
     triggerAutonomousPipelineRun,
-    markAllNotificationsAsRead
+    markAllNotificationsAsRead,
+    userProfile,
+    activeWorkspace,
+    dailyBriefing,
+    weeklyReport,
+    recommendations,
+    switchActiveWorkspace,
+    createWatchlist
   } = usePulse();
 
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isHealthOpen, setIsHealthOpen] = useState(false);
+  const [isBriefingOpen, setIsBriefingOpen] = useState(false);
+  const [isWatchlistsOpen, setIsWatchlistsOpen] = useState(false);
 
   const filteredClusters = eventClusters.filter((cluster) => {
     // 1. Verification status filter
@@ -85,18 +98,40 @@ export default function OverviewPage() {
         unreadNotificationsCount={unreadNotificationsCount}
       />
 
-      {/* Overview Header */}
+      {/* Overview Header with Workspace Switcher */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-900 pb-4 gap-4 font-mono">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-zinc-100 flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-emerald-400" />
-            AUTONOMOUS INTELLIGENCE COMMAND CENTER
+            <User className="w-5 h-5 text-indigo-400" />
+            PERSONALIZED INTELLIGENCE DASHBOARD
           </h1>
           <p className="text-xs text-zinc-500">
-            CONTINUOUS INGESTION // INCREMENTAL CHANGE DETECTION // EVIDENCE-GROUNDED AI
+            OPERATOR: {userProfile?.name.toUpperCase() || 'ANALYST'} // WORKSPACE: {activeWorkspace?.name.toUpperCase() || 'PERSONAL'}
           </p>
         </div>
+
+        {userProfile && activeWorkspace && (
+          <WorkspaceSwitcher
+            workspaces={userProfile.workspaces}
+            activeWorkspace={activeWorkspace}
+            onSwitchWorkspace={switchActiveWorkspace}
+          />
+        )}
       </div>
+
+      {/* Phase 8 Personal Dashboard Widgets */}
+      {activeWorkspace && (
+        <PersonalDashboardWidgets
+          dailyBriefing={dailyBriefing}
+          watchlists={activeWorkspace.watchlists || []}
+          recommendations={recommendations}
+          onOpenBriefing={() => setIsBriefingOpen(true)}
+          onOpenWatchlists={() => setIsWatchlistsOpen(true)}
+          onSelectRecommendation={(rec) => {
+            if (rec.clusterId) handleSelectClusterById(rec.clusterId);
+          }}
+        />
+      )}
 
       {/* Phase 5 Verification Metrics */}
       <VerificationMetricCards
@@ -111,12 +146,12 @@ export default function OverviewPage() {
       {/* Main Grid Section */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
-        {/* Left 2 Columns: Event Clusters Feed */}
+        {/* Left 2 Columns: Personal Intelligence Feed */}
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between border-b border-zinc-900 pb-2 font-mono flex-wrap gap-2">
             <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-300 flex items-center gap-1.5">
               <Activity className="w-4 h-4 text-indigo-400" />
-              Verified Event Clusters ({filteredClusters.length})
+              Personal Intelligence Feed ({filteredClusters.length})
             </h2>
             
             {verificationStatusFilter !== 'ALL' && (
@@ -195,6 +230,24 @@ export default function OverviewPage() {
         onClose={() => setIsHealthOpen(false)}
         health={healthMetrics}
       />
+
+      {/* Executive Briefing Modal */}
+      <BriefingModal
+        isOpen={isBriefingOpen}
+        onClose={() => setIsBriefingOpen(false)}
+        dailyBriefing={dailyBriefing}
+        weeklyReport={weeklyReport}
+      />
+
+      {/* Custom Watchlists Manager Modal */}
+      {activeWorkspace && (
+        <WatchlistManager
+          isOpen={isWatchlistsOpen}
+          onClose={() => setIsWatchlistsOpen(false)}
+          watchlists={activeWorkspace.watchlists || []}
+          onCreateWatchlist={createWatchlist}
+        />
+      )}
 
     </div>
   );
