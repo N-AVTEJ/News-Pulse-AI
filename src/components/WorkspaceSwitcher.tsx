@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Layers, Check } from 'lucide-react';
+import { Layers } from 'lucide-react';
 import { Workspace } from '@/lib/personalization/types';
 
 interface WorkspaceSwitcherProps {

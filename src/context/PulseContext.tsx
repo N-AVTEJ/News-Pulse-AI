@@ -285,6 +285,15 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
         await fetchRuntimeHealth();
         await fetchPersonalization();
 
+        const eventsRes = await fetch('/api/events');
+        if (eventsRes.ok) {
+          const eventsData = await eventsRes.json();
+          if (isMounted) {
+            setClusterTelemetry(eventsData.telemetry || null);
+            setVerificationTelemetry(eventsData.verificationTelemetry || null);
+          }
+        }
+
         const newsRes = await fetch('/api/news');
         if (newsRes.ok) {
           const newsData = await newsRes.json();

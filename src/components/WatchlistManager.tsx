@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Eye, Plus, Trash2, Tag, Layers, CheckCircle2 } from 'lucide-react';
+import { X, Eye, Plus, CheckCircle2 } from 'lucide-react';
 import { Watchlist } from '@/lib/personalization/types';
 
 interface WatchlistManagerProps {

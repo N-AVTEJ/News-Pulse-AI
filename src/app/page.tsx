@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Activity, Sparkles, ShieldCheck, User } from 'lucide-react';
+import { Activity, Sparkles, User } from 'lucide-react';
 import { usePulse } from '@/context/PulseContext';
 import EventClusterCard from '@/components/EventClusterCard';
 import EventClusterVisualizer from '@/components/EventClusterVisualizer';
@@ -106,7 +106,7 @@ export default function OverviewPage() {
             PERSONALIZED INTELLIGENCE DASHBOARD
           </h1>
           <p className="text-xs text-zinc-500">
-            OPERATOR: {userProfile?.name.toUpperCase() || 'ANALYST'} // WORKSPACE: {activeWorkspace?.name.toUpperCase() || 'PERSONAL'}
+            OPERATOR: {userProfile?.name.toUpperCase() || 'ANALYST'} {'//'} WORKSPACE: {activeWorkspace?.name.toUpperCase() || 'PERSONAL'}
           </p>
         </div>
 
