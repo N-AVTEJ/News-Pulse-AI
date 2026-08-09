@@ -36,6 +36,8 @@ export interface EventCluster {
   evidenceGraph?: EvidenceGraph;
   analysisReport?: AnalysisReport;
   breakingState?: BreakingState;
+  relevanceScore?: number;       // Phase 8 Personalization relevance (0-100)
+  matchReasons?: string[];       // Explainable ranking triggers ("Why am I seeing this?")
 }
 
 export interface ClusterConfig {
