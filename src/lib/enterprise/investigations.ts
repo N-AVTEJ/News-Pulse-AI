@@ -1,7 +1,7 @@
 import { Investigation, InvestigationPriority, InvestigationStatus } from './types';
 import { logAuditEvent } from './audit';
 
-let investigationsStore: Investigation[] = [
+const investigationsStore: Investigation[] = [
   {
     id: 'inv_001_openai_trade_secrets',
     title: 'OpenAI vs Apple Trade Secrets & Security Dispute',

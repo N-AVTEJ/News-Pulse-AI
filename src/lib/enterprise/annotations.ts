@@ -1,6 +1,6 @@
 import { AnnotationItem } from './types';
 
-let annotationsStore: AnnotationItem[] = [];
+const annotationsStore: AnnotationItem[] = [];
 
 export function addAnnotation(
   targetId: string,

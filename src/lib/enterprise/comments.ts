@@ -2,7 +2,7 @@ import { extractMentions } from './mentions';
 import { Comment, Role } from './types';
 import { logAuditEvent } from './audit';
 
-let commentsStore: Comment[] = [
+const commentsStore: Comment[] = [
   {
     id: 'cmt_001',
     targetType: 'INVESTIGATION',

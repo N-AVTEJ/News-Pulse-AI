@@ -1,7 +1,7 @@
 import { CollaborativeTask, TaskPriority, TaskStatus } from './types';
 import { logAuditEvent } from './audit';
 
-let tasksStore: CollaborativeTask[] = [
+const tasksStore: CollaborativeTask[] = [
   {
     id: 'tsk_001',
     title: 'Analyze OpenAI Security Court Motion',

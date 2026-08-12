@@ -30,7 +30,7 @@ const defaultMembers: OrgMember[] = [
   }
 ];
 
-let defaultOrganization: Organization = {
+const defaultOrganization: Organization = {
   id: 'org_newspulse_global',
   name: 'NewsPulse Global Intelligence Network',
   domain: 'newspulse.ai',
