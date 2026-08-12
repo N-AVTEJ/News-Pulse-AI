@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Activity, Sparkles, User, ShieldCheck } from 'lucide-react';
+import { Activity, Sparkles, ShieldCheck } from 'lucide-react';
 import { usePulse } from '@/context/PulseContext';
 import EventClusterCard from '@/components/EventClusterCard';
 import EventClusterVisualizer from '@/components/EventClusterVisualizer';
