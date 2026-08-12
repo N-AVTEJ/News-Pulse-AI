@@ -7,6 +7,7 @@ import EventTimelineComponent from './EventTimelineComponent';
 import VerificationPanel from './VerificationPanel';
 import EvidenceGraphVisualizer from './EvidenceGraphVisualizer';
 import AiReportPanel from './AiReportPanel';
+import EvidenceDiscussionThread from './EvidenceDiscussionThread';
 
 interface EventDetailModalProps {
   cluster: EventCluster | null;
