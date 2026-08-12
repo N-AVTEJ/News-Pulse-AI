@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, CheckSquare, Plus, User, Clock, CheckCircle2 } from 'lucide-react';
+import { X, CheckSquare, Plus, User, Clock } from 'lucide-react';
 import { CollaborativeTask, TaskPriority, TaskStatus } from '@/lib/enterprise/types';
 
 interface TaskManagerProps {
@@ -24,7 +24,7 @@ export default function TaskManager({
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [assigneeName, setAssigneeName] = useState('Alex Vance');
-  const [dueDate, setDueDate] = useState(new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0]);
+  const [dueDate, setDueDate] = useState(() => new Date(Date.now() + 86400000 * 3).toISOString().split('T')[0]);
   const [priority, setPriority] = useState<TaskPriority>('MEDIUM');
   const [showCreate, setShowCreate] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
