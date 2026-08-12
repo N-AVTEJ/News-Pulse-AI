@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, ShieldAlert, Search, RefreshCw } from 'lucide-react';
+import { X, ShieldAlert, RefreshCw } from 'lucide-react';
 import { AuditLogEntry } from '@/lib/enterprise/types';
 
 interface AuditLogModalProps {
@@ -14,26 +14,35 @@ export default function AuditLogModal({ isOpen, onClose }: AuditLogModalProps) {
   const [actionFilter, setActionFilter] = useState('ALL');
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchLogs = async () => {
-    setIsLoading(true);
-    try {
-      const url = actionFilter !== 'ALL' ? `/api/audit?action=${actionFilter}` : '/api/audit';
-      const res = await fetch(url);
-      if (res.ok) {
-        const data = await res.json();
-        setLogs(data.logs || []);
-      }
-    } catch (err) {
-      console.error('[AuditLogModal] Failed to fetch audit logs:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    if (isOpen) {
-      fetchLogs();
+    if (!isOpen) return;
+    let isMounted = true;
+
+    async function loadLogs() {
+      setIsLoading(true);
+      try {
+        const url = actionFilter !== 'ALL' ? `/api/audit?action=${actionFilter}` : '/api/audit';
+        const res = await fetch(url);
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted) {
+            setLogs(data.logs || []);
+          }
+        }
+      } catch (err) {
+        console.error('[AuditLogModal] Failed to fetch audit logs:', err);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
     }
+
+    loadLogs();
+
+    return () => {
+      isMounted = false;
+    };
   }, [isOpen, actionFilter]);
 
   if (!isOpen) return null;

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { MessageSquare, Send, User, Quote, CheckCircle2 } from 'lucide-react';
+import { MessageSquare, Send, User, Quote } from 'lucide-react';
 import { Comment } from '@/lib/enterprise/types';
 
 interface EvidenceDiscussionThreadProps {
@@ -21,25 +21,34 @@ export default function EvidenceDiscussionThread({
   const [isLoading, setIsLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const fetchComments = async () => {
-    setIsLoading(true);
-    try {
-      const res = await fetch(`/api/comments?targetType=${targetType}&targetId=${targetId}`);
-      if (res.ok) {
-        const data = await res.json();
-        setComments(data.comments || []);
-      }
-    } catch (err) {
-      console.error('[EvidenceDiscussionThread] Failed to fetch comments:', err);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
   useEffect(() => {
-    if (targetId) {
-      fetchComments();
+    if (!targetId) return;
+    let isMounted = true;
+
+    async function loadComments() {
+      setIsLoading(true);
+      try {
+        const res = await fetch(`/api/comments?targetType=${targetType}&targetId=${targetId}`);
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted) {
+            setComments(data.comments || []);
+          }
+        }
+      } catch (err) {
+        console.error('[EvidenceDiscussionThread] Failed to fetch comments:', err);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
     }
+
+    loadComments();
+
+    return () => {
+      isMounted = false;
+    };
   }, [targetType, targetId]);
 
   const handlePostComment = async (e: React.FormEvent) => {
@@ -62,7 +71,11 @@ export default function EvidenceDiscussionThread({
       if (res.ok) {
         setText('');
         setQuotedEvidence(undefined);
-        await fetchComments();
+        const refreshRes = await fetch(`/api/comments?targetType=${targetType}&targetId=${targetId}`);
+        if (refreshRes.ok) {
+          const data = await refreshRes.json();
+          setComments(data.comments || []);
+        }
       }
     } catch (err) {
       console.error('[EvidenceDiscussionThread] Failed to post comment:', err);
