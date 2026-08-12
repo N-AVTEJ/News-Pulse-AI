@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Activity, Sparkles, User } from 'lucide-react';
+import { Activity, Sparkles, User, ShieldCheck } from 'lucide-react';
 import { usePulse } from '@/context/PulseContext';
 import EventClusterCard from '@/components/EventClusterCard';
 import EventClusterVisualizer from '@/components/EventClusterVisualizer';
@@ -14,6 +14,10 @@ import WorkspaceSwitcher from '@/components/WorkspaceSwitcher';
 import PersonalDashboardWidgets from '@/components/PersonalDashboardWidgets';
 import WatchlistManager from '@/components/WatchlistManager';
 import BriefingModal from '@/components/BriefingModal';
+import TeamDashboardPanel from '@/components/TeamDashboardPanel';
+import InvestigationManager from '@/components/InvestigationManager';
+import TaskManager from '@/components/TaskManager';
+import AuditLogModal from '@/components/AuditLogModal';
 import ActivityFeed from '@/components/ActivityFeed';
 import SourceStatusAlert from '@/components/SourceStatusAlert';
 import { EventCluster } from '@/lib/clustering/types';
@@ -45,13 +49,24 @@ export default function OverviewPage() {
     weeklyReport,
     recommendations,
     switchActiveWorkspace,
-    createWatchlist
+    createWatchlist,
+    organization,
+    investigations,
+    tasks,
+    createEnterpriseInvestigation,
+    updateEnterpriseInvestigationStatus,
+    createEnterpriseTask,
+    updateEnterpriseTaskStatus,
+    toggleTaskChecklist
   } = usePulse();
 
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [isHealthOpen, setIsHealthOpen] = useState(false);
   const [isBriefingOpen, setIsBriefingOpen] = useState(false);
   const [isWatchlistsOpen, setIsWatchlistsOpen] = useState(false);
+  const [isInvestigationsOpen, setIsInvestigationsOpen] = useState(false);
+  const [isTasksOpen, setIsTasksOpen] = useState(false);
+  const [isAuditOpen, setIsAuditOpen] = useState(false);
 
   const filteredClusters = eventClusters.filter((cluster) => {
     // 1. Verification status filter
@@ -102,11 +117,11 @@ export default function OverviewPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-900 pb-4 gap-4 font-mono">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-zinc-100 flex items-center gap-2">
-            <User className="w-5 h-5 text-indigo-400" />
-            PERSONALIZED INTELLIGENCE DASHBOARD
+            <ShieldCheck className="w-5 h-5 text-indigo-400" />
+            ENTERPRISE COLLABORATION & INTELLIGENCE COMMAND CENTER
           </h1>
           <p className="text-xs text-zinc-500">
-            OPERATOR: {userProfile?.name.toUpperCase() || 'ANALYST'} {'//'} WORKSPACE: {activeWorkspace?.name.toUpperCase() || 'PERSONAL'}
+            OPERATOR: {userProfile?.name.toUpperCase() || 'ANALYST'} {'//'} ORG: {organization?.name.toUpperCase() || 'NEWSPULSE GLOBAL'} {'//'} WORKSPACE: {activeWorkspace?.name.toUpperCase() || 'PERSONAL'}
           </p>
         </div>
 
@@ -118,6 +133,16 @@ export default function OverviewPage() {
           />
         )}
       </div>
+
+      {/* Phase 9 Team Dashboard Panel */}
+      <TeamDashboardPanel
+        organization={organization}
+        investigations={investigations}
+        tasks={tasks}
+        onOpenInvestigations={() => setIsInvestigationsOpen(true)}
+        onOpenTasks={() => setIsTasksOpen(true)}
+        onOpenAudit={() => setIsAuditOpen(true)}
+      />
 
       {/* Phase 8 Personal Dashboard Widgets */}
       {activeWorkspace && (
@@ -151,7 +176,7 @@ export default function OverviewPage() {
           <div className="flex items-center justify-between border-b border-zinc-900 pb-2 font-mono flex-wrap gap-2">
             <h2 className="text-xs font-bold uppercase tracking-wider text-zinc-300 flex items-center gap-1.5">
               <Activity className="w-4 h-4 text-indigo-400" />
-              Personal Intelligence Feed ({filteredClusters.length})
+              Verified Event Intelligence Feed ({filteredClusters.length})
             </h2>
             
             {verificationStatusFilter !== 'ALL' && (
@@ -248,6 +273,31 @@ export default function OverviewPage() {
           onCreateWatchlist={createWatchlist}
         />
       )}
+
+      {/* Enterprise Investigations Manager Modal */}
+      <InvestigationManager
+        isOpen={isInvestigationsOpen}
+        onClose={() => setIsInvestigationsOpen(false)}
+        investigations={investigations}
+        onCreateInvestigation={createEnterpriseInvestigation}
+        onUpdateStatus={updateEnterpriseInvestigationStatus}
+      />
+
+      {/* Collaborative Tasks Board Modal */}
+      <TaskManager
+        isOpen={isTasksOpen}
+        onClose={() => setIsTasksOpen(false)}
+        tasks={tasks}
+        onCreateTask={createEnterpriseTask}
+        onUpdateStatus={updateEnterpriseTaskStatus}
+        onToggleChecklist={toggleTaskChecklist}
+      />
+
+      {/* Immutable Audit Log Modal */}
+      <AuditLogModal
+        isOpen={isAuditOpen}
+        onClose={() => setIsAuditOpen(false)}
+      />
 
     </div>
   );

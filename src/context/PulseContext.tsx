@@ -319,7 +319,7 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
       console.error('[PulseContext] Failed to fetch real news:', msg);
-    } fontFinally: {
+    } finally {
       setIsScanning(false);
       setIsLoading(false);
     }

@@ -4,26 +4,29 @@ NewsPulse AI is an autonomous multi-agent news intelligence platform designed to
 
 ---
 
-## 🏗 System Architecture & Personalization Flow
+## 🏗 Enterprise Platform Architecture
 
 ```
-                     EVENTS & VERIFIED INTELLIGENCE (Phases 1–7)
+                     EVENTS & VERIFIED INTELLIGENCE (Phases 1–8)
                                 │
                                 ▼
-                       USER PROFILE & WORKSPACES
+                       ORGANIZATION & RBAC ENGINE
+                 (Owner, Admin, Manager, Analyst, Viewer)
                                 │
                                 ▼
-                      CUSTOM WATCHLIST ENGINE
+                        SHARED WORKSPACES
+           (Cyber Intel, AI Monitoring, Business Intel, Executive)
                                 │
                                 ▼
-                     EXPLAINABLE RANKING ENGINE
-                    ("Why Am I Seeing This?")
+             INVESTIGATIONS & TASK MANAGEMENT ENGINE
+      (Draft ➔ Open ➔ Active ➔ Review ➔ Completed ➔ Archived)
                                 │
                                 ▼
-                    PERSONAL INTELLIGENCE FEED
+                 EVIDENCE DISCUSSIONS & ANNOTATIONS
+               (Threaded Comments, @Mentions, Evidence Quotes)
                                 │
                                 ▼
-             DAILY BRIEFINGS & WEEKLY INTELLIGENCE REPORTS
+              IMMUTABLE AUDIT LOG & TEAM ACTIVITY TIMELINE
                                 │
                                 ▼
             AI INTELLIGENCE REPORT & COMMAND CENTER (UI)
@@ -31,49 +34,46 @@ NewsPulse AI is an autonomous multi-agent news intelligence platform designed to
 
 ---
 
-## 🎯 Phase 8: Personalized Intelligence Platform
+## 🏢 Phase 9: Enterprise Collaboration & Investigation Platform
 
-Phase 8 transforms NewsPulse AI into a personalized news intelligence platform.
+Phase 9 transforms NewsPulse AI into a multi-user enterprise collaboration platform for strategic intelligence operations.
 
-### 1. Custom Watchlists Engine (`src/lib/personalization/watchlists.ts`)
-- Unlimited custom watchlists with keyword, company, product, person, technology, and exclude rules.
-- Evaluates incoming Event Clusters against active workspace watchlists and extracts matching entities.
+### 1. Granular Role-Based Access Control (`src/lib/enterprise/roles.ts`, `permissions.ts`)
+- **Roles**: `OWNER`, `ADMIN`, `MANAGER`, `ANALYST`, `RESEARCHER`, `VIEWER`, `GUEST`.
+- **Permissions**: `VIEW_EVENTS`, `EDIT_INVESTIGATIONS`, `ASSIGN_TASKS`, `MANAGE_MEMBERS`, `MANAGE_WATCHLISTS`, `EXPORT_REPORTS`, `DELETE_COMMENTS`, `MANAGE_ORGANIZATION`, `INVITE_MEMBERS`, `CONFIGURE_ALERTS`.
 
-### 2. Personal Feed & Explainable Ranking Engine (`src/lib/personalization/ranking.ts`, `feedEngine.ts`)
-- Computes 0–100 relevance scores based on Watchlist matches (+35 pts), Entity matches (+25 pts), Category match (+20 pts), and Breaking News/Corroboration level (+25 pts).
-- Displays transparent, human-readable match reasons ("Why am I seeing this?").
+### 2. Investigation Lifecycle Engine (`src/lib/enterprise/investigations.ts`)
+- **State Machine**: `DRAFT` $\rightarrow$ `OPEN` $\rightarrow$ `ACTIVE` $\rightarrow$ `AWAITING_REVIEW` $\rightarrow$ `COMPLETED` $\rightarrow$ `ARCHIVED`.
+- Tracks priority (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`), assignees, linked event clusters, evidence counts, and tags.
 
-### 3. Executive Daily Briefings & Weekly Reports (`src/lib/personalization/briefings.ts`)
-- **Daily Morning Briefing**: Synthesizes Top Verified Events, Watchlist Updates, Breaking News, AI Summaries, and Pending Developments.
-- **Weekly Intelligence Summary**: Synthesizes Major Events, Emerging Trends, Active Entities, and Sector Summaries.
+### 3. Collaborative Tasks & Evidence Discussions (`src/lib/enterprise/tasks.ts`, `comments.ts`, `mentions.ts`)
+- **Tasks**: Analyst assignments (`TODO`, `IN_PROGRESS`, `REVIEW`, `DONE`) with due dates and evidence checklists.
+- **Evidence Discussions**: Threaded discussion comments with `@username` mentions, quoted evidence references, and emoji reactions attached directly to event clusters or investigations.
 
-### 4. Workspaces & Profile Management (`src/lib/personalization/profile.ts`)
-- Supports multiple isolated workspaces (`Personal Space`, `Academic Research`, `Business Intelligence`, `Startup Space`, `University`) with independent watchlists, preferences, saved searches, and alerts.
+### 4. Immutable Audit Logging (`src/lib/enterprise/audit.ts`)
+- Records user actions, privilege changes, investigation state transitions, task assignments, and posted comments (`timestamp`, `userId`, `userName`, `userRole`, `action`, `targetResource`).
 
 ---
 
-## 📌 Personalization API Reference
+## 📌 Enterprise API Reference
 
-### `GET /api/feed`
-Returns personalized intelligence feed with 0–100 relevance scores and explainable match reasons.
+### `GET /api/organizations`
+Returns organization profile, departments, teams, and member roster.
 
-### `GET & PUT /api/profile`
-Get user profile and switch active workspaces.
+### `GET /api/workspaces`
+Returns shared enterprise workspaces.
 
-### `GET & POST /api/watchlists`
-Retrieve and create custom watchlists.
+### `GET & POST /api/investigations`
+Retrieve, create, or update enterprise investigations and lifecycle statuses.
 
-### `GET /api/briefings`
-Returns daily morning briefing and weekly intelligence report.
+### `GET & POST /api/tasks`
+Retrieve, create, or update collaborative analyst tasks and checklists.
 
-### `GET /api/recommendations`
-Returns explainable recommendations.
+### `GET & POST /api/comments`
+Retrieve and post evidence-linked discussion thread comments.
 
-### `GET & DELETE /api/history`
-Retrieve or clear reading history.
-
-### `GET /api/alerts`
-Returns personal alerts.
+### `GET /api/audit`
+Returns searchable immutable audit logs.
 
 ---
 
@@ -81,7 +81,7 @@ Returns personal alerts.
 
 ### Run Tests
 ```bash
-# Run Vitest test suite (52 Unit & Integration tests)
+# Run Vitest test suite (57 Unit & Integration tests)
 npx vitest run
 ```
 
