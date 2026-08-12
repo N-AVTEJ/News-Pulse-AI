@@ -144,7 +144,14 @@ export default function EventDetailModal({ cluster, isOpen, onClose }: EventDeta
           )}
         </div>
 
-        {/* Footer Close */}
+        {/* Phase 9 Evidence Discussions Thread */}
+        <EvidenceDiscussionThread
+          targetType="CLUSTER"
+          targetId={cluster.clusterId}
+          targetHeadline={cluster.canonicalHeadline}
+        />
+
+        {/* Modal Footer */}
         <div className="pt-2 flex justify-end">
           <button
             onClick={onClose}
