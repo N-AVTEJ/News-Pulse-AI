@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Search, Plus, ShieldCheck, AlertCircle, FileText, CheckCircle2, ChevronRight } from 'lucide-react';
+import { X, Plus, ShieldCheck } from 'lucide-react';
 import { Investigation, InvestigationPriority, InvestigationStatus } from '@/lib/enterprise/types';
 
 interface InvestigationManagerProps {
