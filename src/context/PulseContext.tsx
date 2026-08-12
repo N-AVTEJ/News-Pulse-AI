@@ -8,6 +8,7 @@ import { ClusteringTelemetry, EventCluster } from '@/lib/clustering/types';
 import { VerificationTelemetry } from '@/lib/verification/types';
 import { HealthMetrics, NotificationItem } from '@/lib/runtime/types';
 import { DailyBriefing, RecommendationItem, UserProfile, WeeklyReport, Workspace, Watchlist } from '@/lib/personalization/types';
+import { Organization, SharedWorkspace, Investigation, CollaborativeTask, InvestigationPriority, InvestigationStatus, TaskPriority, TaskStatus } from '@/lib/enterprise/types';
 
 interface PulseContextType {
   stories: NewsStory[];
@@ -58,6 +59,17 @@ interface PulseContextType {
   recommendations: RecommendationItem[];
   switchActiveWorkspace: (workspaceId: string) => Promise<void>;
   createWatchlist: (watchlistData: Partial<Watchlist>) => Promise<void>;
+
+  // Phase 9 Enterprise State
+  organization: Organization | null;
+  sharedWorkspaces: SharedWorkspace[];
+  investigations: Investigation[];
+  tasks: CollaborativeTask[];
+  createEnterpriseInvestigation: (title: string, description: string, priority: InvestigationPriority, tags: string[]) => Promise<void>;
+  updateEnterpriseInvestigationStatus: (id: string, status: InvestigationStatus) => Promise<void>;
+  createEnterpriseTask: (title: string, description: string, assigneeName: string, dueDate: string, priority: TaskPriority) => Promise<void>;
+  updateEnterpriseTaskStatus: (taskId: string, status: TaskStatus) => Promise<void>;
+  toggleTaskChecklist: (taskId: string, checklistItemId: string) => Promise<void>;
 }
 
 const PulseContext = createContext<PulseContextType | undefined>(undefined);
@@ -96,6 +108,129 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
   const [dailyBriefing, setDailyBriefing] = useState<DailyBriefing | null>(null);
   const [weeklyReport, setWeeklyReport] = useState<WeeklyReport | null>(null);
   const [recommendations, setRecommendations] = useState<RecommendationItem[]>([]);
+
+  // Phase 9 Enterprise State
+  const [organization, setOrganization] = useState<Organization | null>(null);
+  const [sharedWorkspaces, setSharedWorkspaces] = useState<SharedWorkspace[]>([]);
+  const [investigations, setInvestigations] = useState<Investigation[]>([]);
+  const [tasks, setTasks] = useState<CollaborativeTask[]>([]);
+
+  // Fetch Enterprise APIs
+  const fetchEnterpriseData = async () => {
+    try {
+      const orgRes = await fetch('/api/organizations');
+      if (orgRes.ok) {
+        const orgData = await orgRes.json();
+        setOrganization(orgData.organization || null);
+      }
+
+      const wsRes = await fetch('/api/workspaces');
+      if (wsRes.ok) {
+        const wsData = await wsRes.json();
+        setSharedWorkspaces(wsData.workspaces || []);
+      }
+
+      const invRes = await fetch('/api/investigations');
+      if (invRes.ok) {
+        const invData = await invRes.json();
+        setInvestigations(invData.investigations || []);
+      }
+
+      const taskRes = await fetch('/api/tasks');
+      if (taskRes.ok) {
+        const taskData = await taskRes.json();
+        setTasks(taskData.tasks || []);
+      }
+    } catch (err) {
+      console.error('[PulseContext] Enterprise fetch failed:', err);
+    }
+  };
+
+  const createEnterpriseInvestigation = async (
+    title: string,
+    description: string,
+    priority: InvestigationPriority,
+    tags: string[]
+  ) => {
+    try {
+      const res = await fetch('/api/investigations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, description, priority, tags })
+      });
+      if (res.ok) {
+        await fetchEnterpriseData();
+      }
+    } catch (err) {
+      console.error('[PulseContext] Create investigation failed:', err);
+    }
+  };
+
+  const updateEnterpriseInvestigationStatus = async (id: string, status: InvestigationStatus) => {
+    try {
+      const res = await fetch('/api/investigations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ updateId: id, status })
+      });
+      if (res.ok) {
+        await fetchEnterpriseData();
+      }
+    } catch (err) {
+      console.error('[PulseContext] Update investigation failed:', err);
+    }
+  };
+
+  const createEnterpriseTask = async (
+    title: string,
+    description: string,
+    assigneeName: string,
+    dueDate: string,
+    priority: TaskPriority
+  ) => {
+    try {
+      const res = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, description, assigneeName, dueDate, priority })
+      });
+      if (res.ok) {
+        await fetchEnterpriseData();
+      }
+    } catch (err) {
+      console.error('[PulseContext] Create task failed:', err);
+    }
+  };
+
+  const updateEnterpriseTaskStatus = async (taskId: string, status: TaskStatus) => {
+    try {
+      const res = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ updateTaskId: taskId, status })
+      });
+      if (res.ok) {
+        await fetchEnterpriseData();
+      }
+    } catch (err) {
+      console.error('[PulseContext] Update task failed:', err);
+    }
+  };
+
+  const toggleTaskChecklist = async (taskId: string, checklistItemId: string) => {
+    try {
+      const res = await fetch('/api/tasks', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ toggleTaskId: taskId, checklistItemId })
+      });
+      if (res.ok) {
+        await fetchEnterpriseData();
+      }
+    } catch (err) {
+      console.error('[PulseContext] Toggle task checklist failed:', err);
+    }
+  };
 
   // Fetch Personal Feed & Profile from APIs
   const fetchPersonalization = async () => {
@@ -184,7 +319,7 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown error';
       console.error('[PulseContext] Failed to fetch real news:', msg);
-    } finally {
+    } fontFinally: {
       setIsScanning(false);
       setIsLoading(false);
     }
@@ -210,6 +345,7 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
       }
 
       await fetchPersonalization();
+      await fetchEnterpriseData();
       await fetchRuntimeHealth();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Pipeline run error';
@@ -284,6 +420,7 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
       try {
         await fetchRuntimeHealth();
         await fetchPersonalization();
+        await fetchEnterpriseData();
 
         const eventsRes = await fetch('/api/events');
         if (eventsRes.ok) {
@@ -408,7 +545,16 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
         weeklyReport,
         recommendations,
         switchActiveWorkspace,
-        createWatchlist
+        createWatchlist,
+        organization,
+        sharedWorkspaces,
+        investigations,
+        tasks,
+        createEnterpriseInvestigation,
+        updateEnterpriseInvestigationStatus,
+        createEnterpriseTask,
+        updateEnterpriseTaskStatus,
+        toggleTaskChecklist
       }}
     >
       {children}
