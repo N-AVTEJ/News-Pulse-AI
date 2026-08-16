@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ShieldCheck, Cpu, Building2, Layers, Flame, TrendingUp } from 'lucide-react';
+import { ShieldCheck, Cpu, Building2, Flame, TrendingUp } from 'lucide-react';
 import { EventCluster } from '@/lib/clustering/types';
 import { KnowledgeGraph } from '@/lib/knowledge/types';
 
@@ -28,7 +28,10 @@ export default function ExecutiveCommandCenter({
     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 font-mono text-xs">
       
       {/* Widget 1: Critical & Breaking Events */}
-      <div className="p-4 rounded-xl border border-rose-500/20 bg-rose-950/10 space-y-2">
+      <div 
+        onClick={() => breakingEvents[0] && onSelectCluster(breakingEvents[0])}
+        className="p-4 rounded-xl border border-rose-500/20 bg-rose-950/10 space-y-2 cursor-pointer hover:border-rose-500/40 transition-colors"
+      >
         <div className="flex items-center justify-between">
           <span className="text-[10px] font-bold uppercase text-rose-400 flex items-center gap-1.5">
             <Flame className="w-3.5 h-3.5" />

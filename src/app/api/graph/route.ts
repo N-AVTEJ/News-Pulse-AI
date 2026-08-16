@@ -14,7 +14,7 @@ export async function GET() {
     const { enrichedClusters } = await generateAllAnalysisReports(verifiedClusters);
 
     const graph = buildKnowledgeGraphFromClusters(enrichedClusters);
-    const analytics = getExecutiveGraphAnalytics(enrichedClusters);
+    const analytics = getExecutiveGraphAnalytics();
 
     return NextResponse.json({
       nodesCount: graph.nodes.length,

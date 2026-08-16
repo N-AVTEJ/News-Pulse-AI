@@ -1,4 +1,3 @@
-import { EventCluster } from '../clustering/types';
 import { graphStore } from './graph';
 
 export interface ExecutiveAnalytics {
@@ -9,7 +8,7 @@ export interface ExecutiveAnalytics {
   topConnectedEntities: { name: string; type: string; count: number }[];
 }
 
-export function getExecutiveGraphAnalytics(clusters: EventCluster[]): ExecutiveAnalytics {
+export function getExecutiveGraphAnalytics(): ExecutiveAnalytics {
   const graph = graphStore.getGraph();
   const nodeTypeCounts: Record<string, number> = {};
   const edgeRelationCounts: Record<string, number> = {};

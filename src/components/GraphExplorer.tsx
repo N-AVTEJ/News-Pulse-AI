@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Network, Filter, Search, ChevronRight, Share2 } from 'lucide-react';
-import { GraphEdge, GraphNode, KnowledgeGraph } from '@/lib/knowledge/types';
+import { GraphNode, KnowledgeGraph } from '@/lib/knowledge/types';
 
 interface GraphExplorerProps {
   graph: KnowledgeGraph | null;
