@@ -4,76 +4,69 @@ NewsPulse AI is an autonomous multi-agent news intelligence platform designed to
 
 ---
 
-## 🏗 Enterprise Platform Architecture
+## 🌐 Intelligence Operating System Architecture (Phases 1–10)
 
 ```
-                     EVENTS & VERIFIED INTELLIGENCE (Phases 1–8)
+                     EVENTS, VERIFICATION, & AI REPORTS (Phases 1–9)
                                 │
                                 ▼
-                       ORGANIZATION & RBAC ENGINE
-                 (Owner, Admin, Manager, Analyst, Viewer)
+                   DETERMINISTIC ENTITY RESOLUTION
+             (OpenAI Inc. / OpenAI / Open AI ➔ Canonical OpenAI)
                                 │
                                 ▼
-                        SHARED WORKSPACES
-           (Cyber Intel, AI Monitoring, Business Intel, Executive)
+                 EVIDENCE-GROUNDED RELATIONSHIP DISCOVERY
+            (acquired, released, partnered, reported_by, located_in)
                                 │
                                 ▼
-             INVESTIGATIONS & TASK MANAGEMENT ENGINE
-      (Draft ➔ Open ➔ Active ➔ Review ➔ Completed ➔ Archived)
+                    ENTERPRISE KNOWLEDGE GRAPH
+             (Companies, Tech, People, Gov, Events, Investigations)
                                 │
                                 ▼
-                 EVIDENCE DISCUSSIONS & ANNOTATIONS
-               (Threaded Comments, @Mentions, Evidence Quotes)
+           NATURAL LANGUAGE QUERY ENGINE & HISTORICAL ARCHIVE
+         ("Show verified OpenAI events", "NVIDIA reports")
                                 │
                                 ▼
-              IMMUTABLE AUDIT LOG & TEAM ACTIVITY TIMELINE
-                                │
-                                ▼
-            AI INTELLIGENCE REPORT & COMMAND CENTER (UI)
+        GRAPH EXPLORER, ENTITY PROFILES, & EXECUTIVE COMMAND CENTER (UI)
 ```
 
 ---
 
-## 🏢 Phase 9: Enterprise Collaboration & Investigation Platform
+## 🏛 Phase 10: Global Knowledge Graph & Executive Command Center
 
-Phase 9 transforms NewsPulse AI into a multi-user enterprise collaboration platform for strategic intelligence operations.
+Phase 10 completes NewsPulse AI's evolution into a full Intelligence Operating System.
 
-### 1. Granular Role-Based Access Control (`src/lib/enterprise/roles.ts`, `permissions.ts`)
-- **Roles**: `OWNER`, `ADMIN`, `MANAGER`, `ANALYST`, `RESEARCHER`, `VIEWER`, `GUEST`.
-- **Permissions**: `VIEW_EVENTS`, `EDIT_INVESTIGATIONS`, `ASSIGN_TASKS`, `MANAGE_MEMBERS`, `MANAGE_WATCHLISTS`, `EXPORT_REPORTS`, `DELETE_COMMENTS`, `MANAGE_ORGANIZATION`, `INVITE_MEMBERS`, `CONFIGURE_ALERTS`.
+### 1. In-Memory Graph Database Abstraction (`src/lib/knowledge/graph.ts`)
+- **12 Node Types**: `COMPANY`, `ORGANIZATION`, `PERSON`, `GOVERNMENT`, `TECHNOLOGY`, `PRODUCT`, `COUNTRY`, `CITY`, `EVENT`, `INVESTIGATION`, `REPORT`, `SOURCE`.
+- **10 Edge Relations**: `acquired`, `released`, `partnered`, `reported_by`, `located_in`, `works_for`, `investigates`, `mentions`, `references`, `related_to`.
 
-### 2. Investigation Lifecycle Engine (`src/lib/enterprise/investigations.ts`)
-- **State Machine**: `DRAFT` $\rightarrow$ `OPEN` $\rightarrow$ `ACTIVE` $\rightarrow$ `AWAITING_REVIEW` $\rightarrow$ `COMPLETED` $\rightarrow$ `ARCHIVED`.
-- Tracks priority (`CRITICAL`, `HIGH`, `MEDIUM`, `LOW`), assignees, linked event clusters, evidence counts, and tags.
+### 2. Deterministic Entity Resolution (`src/lib/knowledge/entityResolver.ts`)
+- Normalizes raw name variations (`"OpenAI Inc."`, `"Open AI"`, `"OpenAI"`) $\rightarrow$ canonical `"OpenAI"`.
+- Preserves alias arrays without improper merges of distinct entities.
 
-### 3. Collaborative Tasks & Evidence Discussions (`src/lib/enterprise/tasks.ts`, `comments.ts`, `mentions.ts`)
-- **Tasks**: Analyst assignments (`TODO`, `IN_PROGRESS`, `REVIEW`, `DONE`) with due dates and evidence checklists.
-- **Evidence Discussions**: Threaded discussion comments with `@username` mentions, quoted evidence references, and emoji reactions attached directly to event clusters or investigations.
+### 3. Natural Language Intelligence Query Engine (`src/lib/knowledge/queryEngine.ts`)
+- Translates natural language queries (e.g., `"Show all verified OpenAI events"`, `"Find reports mentioning NVIDIA"`) into structured filter parameters (`category`, `entity`, `verificationStatus`).
 
-### 4. Immutable Audit Logging (`src/lib/enterprise/audit.ts`)
-- Records user actions, privilege changes, investigation state transitions, task assignments, and posted comments (`timestamp`, `userId`, `userName`, `userRole`, `action`, `targetResource`).
+### 4. Historical Intelligence Archive & Unified Timelines (`archive.ts`, `timeline.ts`)
+- Searchable historical archive repository and multi-source timeline engine merging verified events, AI reports, and investigation milestones.
 
 ---
 
-## 📌 Enterprise API Reference
+## 📌 Knowledge Graph API Reference
 
-### `GET /api/organizations`
-Returns organization profile, departments, teams, and member roster.
+### `GET /api/graph`
+Returns Knowledge Graph nodes, directed relationship edges, and executive analytics.
 
-### `GET /api/workspaces`
-Returns shared enterprise workspaces.
+### `GET /api/entities` & `GET /api/entities/[id]`
+Returns catalog of resolved entities and detailed entity profile node details.
 
-### `GET & POST /api/investigations`
-Retrieve, create, or update enterprise investigations and lifecycle statuses.
+### `GET /api/relationships`
+Returns evidence-grounded entity relationship triples.
 
-### `GET & POST /api/tasks`
-Retrieve, create, or update collaborative analyst tasks and checklists.
+### `POST /api/query`
+Executes natural language intelligence queries and returns matching event clusters.
 
-### `GET & POST /api/comments`
-Retrieve and post evidence-linked discussion thread comments.
-
-### `GET /api/audit`
-Returns searchable immutable audit logs.
+### `GET /api/archive`
+Returns historical intelligence archives.
 
 ---
 
@@ -81,7 +74,7 @@ Returns searchable immutable audit logs.
 
 ### Run Tests
 ```bash
-# Run Vitest test suite (57 Unit & Integration tests)
+# Run Vitest test suite (60 Unit & Integration tests)
 npx vitest run
 ```
 
@@ -99,4 +92,4 @@ npm run build
 # Start local production server
 npm run start
 ```
-Open [http://localhost:3000](http://localhost:3000) to view the Autonomous Intelligence Command Center.
+Open [http://localhost:3000](http://localhost:3000) to view the Executive Command Center & Graph Explorer.

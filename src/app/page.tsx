@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Activity, Sparkles, ShieldCheck } from 'lucide-react';
+import { Activity, Sparkles, ShieldCheck, Network } from 'lucide-react';
 import { usePulse } from '@/context/PulseContext';
 import EventClusterCard from '@/components/EventClusterCard';
 import EventClusterVisualizer from '@/components/EventClusterVisualizer';
@@ -18,6 +18,10 @@ import TeamDashboardPanel from '@/components/TeamDashboardPanel';
 import InvestigationManager from '@/components/InvestigationManager';
 import TaskManager from '@/components/TaskManager';
 import AuditLogModal from '@/components/AuditLogModal';
+import ExecutiveCommandCenter from '@/components/ExecutiveCommandCenter';
+import NaturalLanguageQueryBar from '@/components/NaturalLanguageQueryBar';
+import GraphExplorer from '@/components/GraphExplorer';
+import EntityProfileModal from '@/components/EntityProfileModal';
 import ActivityFeed from '@/components/ActivityFeed';
 import SourceStatusAlert from '@/components/SourceStatusAlert';
 import { EventCluster } from '@/lib/clustering/types';
@@ -57,7 +61,17 @@ export default function OverviewPage() {
     updateEnterpriseInvestigationStatus,
     createEnterpriseTask,
     updateEnterpriseTaskStatus,
-    toggleTaskChecklist
+    toggleTaskChecklist,
+    knowledgeGraph,
+    selectedEntityNode,
+    selectedEntityNeighbors,
+    selectedEntityClusters,
+    isEntityProfileOpen,
+    setIsEntityProfileOpen,
+    selectEntityNode,
+    activeQueryResult,
+    executeQuery,
+    clearQuery
   } = usePulse();
 
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -69,10 +83,15 @@ export default function OverviewPage() {
   const [isAuditOpen, setIsAuditOpen] = useState(false);
 
   const filteredClusters = eventClusters.filter((cluster) => {
-    // 1. Verification status filter
+    // 1. Natural language query result match
+    if (activeQueryResult && activeQueryResult.matchedClusterIds) {
+      if (!activeQueryResult.matchedClusterIds.includes(cluster.clusterId)) return false;
+    }
+
+    // 2. Verification status filter
     const matchesStatus = verificationStatusFilter === 'ALL' || cluster.verificationResult?.verificationStatus === verificationStatusFilter;
 
-    // 2. Global search query across headline, summary, publishers, and extracted entities
+    // 3. Global search query across headline, summary, publishers, and extracted entities
     const q = searchQuery.toLowerCase();
     const matchesSearch = searchQuery === '' ||
       cluster.canonicalHeadline.toLowerCase().includes(q) ||
@@ -117,8 +136,8 @@ export default function OverviewPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-900 pb-4 gap-4 font-mono">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-zinc-100 flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-indigo-400" />
-            ENTERPRISE COLLABORATION & INTELLIGENCE COMMAND CENTER
+            <Network className="w-5 h-5 text-indigo-400" />
+            INTELLIGENCE OPERATING SYSTEM — EXECUTIVE COMMAND CENTER
           </h1>
           <p className="text-xs text-zinc-500">
             OPERATOR: {userProfile?.name.toUpperCase() || 'ANALYST'} {'//'} ORG: {organization?.name.toUpperCase() || 'NEWSPULSE GLOBAL'} {'//'} WORKSPACE: {activeWorkspace?.name.toUpperCase() || 'PERSONAL'}
@@ -133,6 +152,26 @@ export default function OverviewPage() {
           />
         )}
       </div>
+
+      {/* Phase 10 Executive Command Center */}
+      <ExecutiveCommandCenter
+        eventClusters={eventClusters}
+        graph={knowledgeGraph}
+        onSelectCluster={handleSelectCluster}
+      />
+
+      {/* Phase 10 Natural Language Query Bar */}
+      <NaturalLanguageQueryBar
+        onExecuteQuery={executeQuery}
+        onClearQuery={clearQuery}
+        activeQueryResult={activeQueryResult}
+      />
+
+      {/* Phase 10 Enterprise Knowledge Graph Explorer */}
+      <GraphExplorer
+        graph={knowledgeGraph}
+        onSelectNode={selectEntityNode}
+      />
 
       {/* Phase 9 Team Dashboard Panel */}
       <TeamDashboardPanel
@@ -202,7 +241,7 @@ export default function OverviewPage() {
           ) : filteredClusters.length === 0 ? (
             <div className="flex flex-col items-center justify-center border border-dashed border-zinc-800 rounded-lg py-16 px-4 bg-zinc-900/5 text-center font-mono">
               <Sparkles className="w-6 h-6 text-zinc-600 mb-2 opacity-50" />
-              <h3 className="text-sm font-semibold text-zinc-400">No Event Clusters Match Search Criteria</h3>
+              <h3 className="text-sm font-semibold text-zinc-400">No Event Clusters Match Query Criteria</h3>
               <p className="text-xs text-zinc-500 mt-1 max-w-sm">
                 Try clearing search filters or trigger an autonomous pipeline run.
               </p>
@@ -238,6 +277,19 @@ export default function OverviewPage() {
         cluster={selectedCluster}
         isOpen={isClusterDetailOpen}
         onClose={() => setIsClusterDetailOpen(false)}
+      />
+
+      {/* Entity Profile Modal */}
+      <EntityProfileModal
+        isOpen={isEntityProfileOpen}
+        onClose={() => setIsEntityProfileOpen(false)}
+        node={selectedEntityNode}
+        neighbors={selectedEntityNeighbors}
+        relatedClusters={selectedEntityClusters}
+        onSelectCluster={(cluster) => {
+          setIsEntityProfileOpen(false);
+          handleSelectCluster(cluster);
+        }}
       />
 
       {/* Notifications Drawer */}

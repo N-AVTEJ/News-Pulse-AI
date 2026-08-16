@@ -9,6 +9,7 @@ import { VerificationTelemetry } from '@/lib/verification/types';
 import { HealthMetrics, NotificationItem } from '@/lib/runtime/types';
 import { DailyBriefing, RecommendationItem, UserProfile, WeeklyReport, Workspace, Watchlist } from '@/lib/personalization/types';
 import { Organization, SharedWorkspace, Investigation, CollaborativeTask, InvestigationPriority, InvestigationStatus, TaskPriority, TaskStatus } from '@/lib/enterprise/types';
+import { GraphEdge, GraphNode, KnowledgeGraph, NaturalLanguageQueryResult } from '@/lib/knowledge/types';
 
 interface PulseContextType {
   stories: NewsStory[];
@@ -70,6 +71,18 @@ interface PulseContextType {
   createEnterpriseTask: (title: string, description: string, assigneeName: string, dueDate: string, priority: TaskPriority) => Promise<void>;
   updateEnterpriseTaskStatus: (taskId: string, status: TaskStatus) => Promise<void>;
   toggleTaskChecklist: (taskId: string, checklistItemId: string) => Promise<void>;
+
+  // Phase 10 Knowledge Graph State
+  knowledgeGraph: KnowledgeGraph | null;
+  selectedEntityNode: GraphNode | null;
+  selectedEntityNeighbors: { node: GraphNode; edge: GraphEdge }[];
+  selectedEntityClusters: EventCluster[];
+  isEntityProfileOpen: boolean;
+  setIsEntityProfileOpen: (isOpen: boolean) => void;
+  selectEntityNode: (node: GraphNode) => Promise<void>;
+  activeQueryResult: NaturalLanguageQueryResult | null;
+  executeQuery: (queryText: string) => Promise<NaturalLanguageQueryResult | null>;
+  clearQuery: () => void;
 }
 
 const PulseContext = createContext<PulseContextType | undefined>(undefined);
@@ -114,6 +127,70 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
   const [sharedWorkspaces, setSharedWorkspaces] = useState<SharedWorkspace[]>([]);
   const [investigations, setInvestigations] = useState<Investigation[]>([]);
   const [tasks, setTasks] = useState<CollaborativeTask[]>([]);
+
+  // Phase 10 Knowledge Graph State
+  const [knowledgeGraph, setKnowledgeGraph] = useState<KnowledgeGraph | null>(null);
+  const [selectedEntityNode, setSelectedEntityNode] = useState<GraphNode | null>(null);
+  const [selectedEntityNeighbors, setSelectedEntityNeighbors] = useState<{ node: GraphNode; edge: GraphEdge }[]>([]);
+  const [selectedEntityClusters, setSelectedEntityClusters] = useState<EventCluster[]>([]);
+  const [isEntityProfileOpen, setIsEntityProfileOpen] = useState(false);
+  const [activeQueryResult, setActiveQueryResult] = useState<NaturalLanguageQueryResult | null>(null);
+
+  // Fetch Knowledge Graph from API
+  const fetchKnowledgeGraph = async () => {
+    try {
+      const res = await fetch('/api/graph');
+      if (res.ok) {
+        const data = await res.json();
+        setKnowledgeGraph(data.graph || null);
+      }
+    } catch (err) {
+      console.error('[PulseContext] Knowledge Graph fetch failed:', err);
+    }
+  };
+
+  const selectEntityNode = async (node: GraphNode) => {
+    setSelectedEntityNode(node);
+    setIsEntityProfileOpen(true);
+    try {
+      const res = await fetch(`/api/entities/${node.id}`);
+      if (res.ok) {
+        const data = await res.json();
+        setSelectedEntityNeighbors(data.neighbors || []);
+        setSelectedEntityClusters(data.relatedClusters || []);
+      }
+    } catch (err) {
+      console.error('[PulseContext] Fetch entity details failed:', err);
+    }
+  };
+
+  const executeQuery = async (queryText: string): Promise<NaturalLanguageQueryResult | null> => {
+    try {
+      const res = await fetch('/api/query', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: queryText })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        const result: NaturalLanguageQueryResult = {
+          rawQuery: data.query,
+          filter: data.filter,
+          matchedClusterIds: (data.matchedClusters || []).map((c: EventCluster) => c.clusterId),
+          explanation: data.explanation
+        };
+        setActiveQueryResult(result);
+        return result;
+      }
+    } catch (err) {
+      console.error('[PulseContext] Query execution failed:', err);
+    }
+    return null;
+  };
+
+  const clearQuery = () => {
+    setActiveQueryResult(null);
+  };
 
   // Fetch Enterprise APIs
   const fetchEnterpriseData = async () => {
@@ -346,6 +423,7 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
 
       await fetchPersonalization();
       await fetchEnterpriseData();
+      await fetchKnowledgeGraph();
       await fetchRuntimeHealth();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Pipeline run error';
@@ -398,6 +476,7 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
 
       setScoutIntelligence(data.intelligence || []);
       await fetchPersonalization();
+      await fetchKnowledgeGraph();
 
       if (Array.isArray(data.activityLogs)) {
         setActivityLogs((prev) => [...data.activityLogs, ...prev.slice(0, 30)]);
@@ -421,6 +500,7 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
         await fetchRuntimeHealth();
         await fetchPersonalization();
         await fetchEnterpriseData();
+        await fetchKnowledgeGraph();
 
         const eventsRes = await fetch('/api/events');
         if (eventsRes.ok) {
@@ -554,7 +634,17 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
         updateEnterpriseInvestigationStatus,
         createEnterpriseTask,
         updateEnterpriseTaskStatus,
-        toggleTaskChecklist
+        toggleTaskChecklist,
+        knowledgeGraph,
+        selectedEntityNode,
+        selectedEntityNeighbors,
+        selectedEntityClusters,
+        isEntityProfileOpen,
+        setIsEntityProfileOpen,
+        selectEntityNode,
+        activeQueryResult,
+        executeQuery,
+        clearQuery
       }}
     >
       {children}
