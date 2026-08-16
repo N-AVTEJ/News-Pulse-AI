@@ -38,6 +38,8 @@ export interface EventCluster {
   breakingState?: BreakingState;
   relevanceScore?: number;       // Phase 8 Personalization relevance (0-100)
   matchReasons?: string[];       // Explainable ranking triggers ("Why am I seeing this?")
+  graphNodeIds?: string[];       // Phase 10 Knowledge Graph Node IDs
+  resolvedEntities?: string[];   // Phase 10 Resolved Canonical Entity Names
 }
 
 export interface ClusterConfig {
