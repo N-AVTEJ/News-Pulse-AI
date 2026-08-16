@@ -70,9 +70,9 @@ export function buildKnowledgeGraphFromClusters(clusters: EventCluster[]): Knowl
         sourceId,
         targetId,
         relation: edgeRelation,
-        evidenceCount: rel.evidenceCount || 1,
+        evidenceCount: 1,
         supportingClusterIds: [cluster.clusterId],
-        weight: rel.evidenceCount || 1
+        weight: 1
       };
       graphStore.addEdge(edge);
     }
