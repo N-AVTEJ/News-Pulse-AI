@@ -29,7 +29,7 @@ export function generateWebhookSignature(payload: string, secret: string): strin
 
 export function dispatchWebhookPayload(targetUrl: string, eventType: string, payload: Record<string, unknown>, secret: string = 'np_wh_secret'): WebhookDeliveryLog {
   const payloadStr = JSON.stringify(payload);
-  const _signature = generateWebhookSignature(payloadStr, secret);
+  generateWebhookSignature(payloadStr, secret);
 
   const log: WebhookDeliveryLog = {
     id: `whlog_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
