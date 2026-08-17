@@ -1,7 +1,7 @@
 import { eventBus } from '../eventBus';
 import { WorkflowDefinition, WorkflowExecution } from '../types';
 
-let workflowsStore: WorkflowDefinition[] = [
+const workflowsStore: WorkflowDefinition[] = [
   {
     id: 'wf_breaking_alert_flow',
     name: 'Breaking News Slack & Jira Dispatch',
@@ -23,7 +23,7 @@ let workflowsStore: WorkflowDefinition[] = [
   }
 ];
 
-let executionsStore: WorkflowExecution[] = [
+const executionsStore: WorkflowExecution[] = [
   {
     id: 'exec_001',
     workflowId: 'wf_breaking_alert_flow',

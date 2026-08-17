@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, Puzzle, ShieldCheck, CheckCircle2, AlertTriangle, Plus } from 'lucide-react';
+import { X, Puzzle, ShieldCheck, AlertTriangle, Plus } from 'lucide-react';
 import { PluginInstance } from '@/lib/platform/types';
 
 interface PluginRegistryModalProps {

@@ -1,6 +1,6 @@
 import { ApiKey } from '../types';
 
-let apiKeysStore: ApiKey[] = [
+const apiKeysStore: ApiKey[] = [
   {
     id: 'key_prod_01',
     key: 'np_live_sec_8923749283749823',

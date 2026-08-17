@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { X, GitBranch, Play, Plus, ArrowRight, CheckCircle2, History } from 'lucide-react';
+import { X, GitBranch, Play, Plus, ArrowRight, History } from 'lucide-react';
 import { WorkflowDefinition, WorkflowExecution } from '@/lib/platform/types';
 
 interface WorkflowBuilderProps {

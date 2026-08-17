@@ -1,5 +1,3 @@
-import { PluginManifest } from './types';
-
 const CURRENT_PLATFORM_VERSION = '1.0.0';
 
 export function validatePluginManifest(manifest: unknown): { valid: boolean; errors: string[] } {
