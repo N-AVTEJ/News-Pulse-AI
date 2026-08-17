@@ -10,6 +10,7 @@ import { HealthMetrics, NotificationItem } from '@/lib/runtime/types';
 import { DailyBriefing, RecommendationItem, UserProfile, WeeklyReport, Workspace, Watchlist } from '@/lib/personalization/types';
 import { Organization, SharedWorkspace, Investigation, CollaborativeTask, InvestigationPriority, InvestigationStatus, TaskPriority, TaskStatus } from '@/lib/enterprise/types';
 import { GraphEdge, GraphNode, KnowledgeGraph, NaturalLanguageQueryResult } from '@/lib/knowledge/types';
+import { ApiKey, PluginInstance, WebhookDeliveryLog, WorkflowDefinition, WorkflowExecution } from '@/lib/platform/types';
 
 interface PulseContextType {
   stories: NewsStory[];
@@ -83,6 +84,18 @@ interface PulseContextType {
   activeQueryResult: NaturalLanguageQueryResult | null;
   executeQuery: (queryText: string) => Promise<NaturalLanguageQueryResult | null>;
   clearQuery: () => void;
+
+  // Phase 11 Platform SDK State
+  plugins: PluginInstance[];
+  workflows: WorkflowDefinition[];
+  workflowExecutions: WorkflowExecution[];
+  apiKeys: ApiKey[];
+  webhookLogs: WebhookDeliveryLog[];
+  togglePlatformPlugin: (pluginId: string, enabled: boolean) => Promise<void>;
+  registerPlatformPlugin: (manifest: unknown) => Promise<void>;
+  executePlatformWorkflow: (workflowId: string) => Promise<void>;
+  createPlatformWorkflow: (name: string, description: string) => Promise<void>;
+  createPlatformApiKey: (name: string) => Promise<void>;
 }
 
 const PulseContext = createContext<PulseContextType | undefined>(undefined);
@@ -135,6 +148,109 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
   const [selectedEntityClusters, setSelectedEntityClusters] = useState<EventCluster[]>([]);
   const [isEntityProfileOpen, setIsEntityProfileOpen] = useState(false);
   const [activeQueryResult, setActiveQueryResult] = useState<NaturalLanguageQueryResult | null>(null);
+
+  // Phase 11 Platform SDK State
+  const [plugins, setPlugins] = useState<PluginInstance[]>([]);
+  const [workflows, setWorkflows] = useState<WorkflowDefinition[]>([]);
+  const [workflowExecutions, setWorkflowExecutions] = useState<WorkflowExecution[]>([]);
+  const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
+  const [webhookLogs, setWebhookLogs] = useState<WebhookDeliveryLog[]>([]);
+
+  const fetchPlatformData = async () => {
+    try {
+      const plgRes = await fetch('/api/v1/plugins');
+      if (plgRes.ok) {
+        const plgData = await plgRes.json();
+        setPlugins(plgData.plugins || []);
+      }
+
+      const wfRes = await fetch('/api/v1/workflows');
+      if (wfRes.ok) {
+        const wfData = await wfRes.json();
+        setWorkflows(wfData.workflows || []);
+        setWorkflowExecutions(wfData.executions || []);
+      }
+
+      const keyRes = await fetch('/api/v1/keys');
+      if (keyRes.ok) {
+        const keyData = await keyRes.json();
+        setApiKeys(keyData.keys || []);
+      }
+
+      const whRes = await fetch('/api/v1/webhooks');
+      if (whRes.ok) {
+        const whData = await whRes.json();
+        setWebhookLogs(whData.logs || []);
+      }
+    } catch (err) {
+      console.error('[PulseContext] Platform fetch failed:', err);
+    }
+  };
+
+  const togglePlatformPlugin = async (pluginId: string, enabled: boolean) => {
+    try {
+      const res = await fetch('/api/v1/plugins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ togglePluginId: pluginId, enabled })
+      });
+      if (res.ok) await fetchPlatformData();
+    } catch (err) {
+      console.error('[PulseContext] Toggle plugin failed:', err);
+    }
+  };
+
+  const registerPlatformPlugin = async (manifest: unknown) => {
+    try {
+      const res = await fetch('/api/v1/plugins', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ manifest })
+      });
+      if (res.ok) await fetchPlatformData();
+    } catch (err) {
+      console.error('[PulseContext] Register plugin failed:', err);
+    }
+  };
+
+  const executePlatformWorkflow = async (workflowId: string) => {
+    try {
+      const res = await fetch('/api/v1/workflows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ executeWorkflowId: workflowId })
+      });
+      if (res.ok) await fetchPlatformData();
+    } catch (err) {
+      console.error('[PulseContext] Execute workflow failed:', err);
+    }
+  };
+
+  const createPlatformWorkflow = async (name: string, description: string) => {
+    try {
+      const res = await fetch('/api/v1/workflows', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, description })
+      });
+      if (res.ok) await fetchPlatformData();
+    } catch (err) {
+      console.error('[PulseContext] Create workflow failed:', err);
+    }
+  };
+
+  const createPlatformApiKey = async (name: string) => {
+    try {
+      const res = await fetch('/api/v1/keys', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name })
+      });
+      if (res.ok) await fetchPlatformData();
+    } catch (err) {
+      console.error('[PulseContext] Create API key failed:', err);
+    }
+  };
 
   // Fetch Knowledge Graph from API
   const fetchKnowledgeGraph = async () => {
@@ -424,6 +540,7 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
       await fetchPersonalization();
       await fetchEnterpriseData();
       await fetchKnowledgeGraph();
+      await fetchPlatformData();
       await fetchRuntimeHealth();
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Pipeline run error';
@@ -477,6 +594,7 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
       setScoutIntelligence(data.intelligence || []);
       await fetchPersonalization();
       await fetchKnowledgeGraph();
+      await fetchPlatformData();
 
       if (Array.isArray(data.activityLogs)) {
         setActivityLogs((prev) => [...data.activityLogs, ...prev.slice(0, 30)]);
@@ -501,6 +619,7 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
         await fetchPersonalization();
         await fetchEnterpriseData();
         await fetchKnowledgeGraph();
+        await fetchPlatformData();
 
         const eventsRes = await fetch('/api/events');
         if (eventsRes.ok) {
@@ -644,7 +763,17 @@ export function PulseProvider({ children }: { children: React.ReactNode }) {
         selectEntityNode,
         activeQueryResult,
         executeQuery,
-        clearQuery
+        clearQuery,
+        plugins,
+        workflows,
+        workflowExecutions,
+        apiKeys,
+        webhookLogs,
+        togglePlatformPlugin,
+        registerPlatformPlugin,
+        executePlatformWorkflow,
+        createPlatformWorkflow,
+        createPlatformApiKey
       }}
     >
       {children}

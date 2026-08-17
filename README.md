@@ -4,69 +4,83 @@ NewsPulse AI is an autonomous multi-agent news intelligence platform designed to
 
 ---
 
-## 🌐 Intelligence Operating System Architecture (Phases 1–10)
+## ⚡ Extensible Intelligence Platform Architecture (Phases 1–11)
 
 ```
-                     EVENTS, VERIFICATION, & AI REPORTS (Phases 1–9)
+                     EVENTS, VERIFICATION, & KNOWLEDGE GRAPH (Phases 1–10)
                                 │
                                 ▼
-                   DETERMINISTIC ENTITY RESOLUTION
-             (OpenAI Inc. / OpenAI / Open AI ➔ Canonical OpenAI)
+                       INTERNAL EVENT BUS
+         (EventClusterCreated, VerificationCompleted, TaskAssigned)
                                 │
                                 ▼
-                 EVIDENCE-GROUNDED RELATIONSHIP DISCOVERY
-            (acquired, released, partnered, reported_by, located_in)
+               PLUGIN SDK & CAPABILITY-BASED SANDBOX
+         (Data Connectors, Analysis Modules, Workflow Actions)
                                 │
                                 ▼
-                    ENTERPRISE KNOWLEDGE GRAPH
-             (Companies, Tech, People, Gov, Events, Investigations)
+              VISUAL WORKFLOW AUTOMATION ENGINE
+            (Triggers ➔ Conditions ➔ Actions ➔ Webhooks)
                                 │
                                 ▼
-           NATURAL LANGUAGE QUERY ENGINE & HISTORICAL ARCHIVE
-         ("Show verified OpenAI events", "NVIDIA reports")
+                 ENTERPRISE INTEGRATION ADAPTERS
+              (Slack, Teams, Jira, GitHub, SIEM, Webhooks)
                                 │
                                 ▼
-        GRAPH EXPLORER, ENTITY PROFILES, & EXECUTIVE COMMAND CENTER (UI)
+             VERSIONED PUBLIC API PLATFORM & AUTH
+                (API Keys, Rate Limiting, SDKs)
+                                │
+                                ▼
+          DEVELOPER PORTAL & CUSTOM DASHBOARD BUILDER (UI)
 ```
 
 ---
 
-## 🏛 Phase 10: Global Knowledge Graph & Executive Command Center
+## 🛠 Phase 11: Platform SDK, Automation Builder & Enterprise Integrations
 
-Phase 10 completes NewsPulse AI's evolution into a full Intelligence Operating System.
+Phase 11 transforms NewsPulse AI into an extensible, enterprise-grade intelligence platform.
 
-### 1. In-Memory Graph Database Abstraction (`src/lib/knowledge/graph.ts`)
-- **12 Node Types**: `COMPANY`, `ORGANIZATION`, `PERSON`, `GOVERNMENT`, `TECHNOLOGY`, `PRODUCT`, `COUNTRY`, `CITY`, `EVENT`, `INVESTIGATION`, `REPORT`, `SOURCE`.
-- **10 Edge Relations**: `acquired`, `released`, `partnered`, `reported_by`, `located_in`, `works_for`, `investigates`, `mentions`, `references`, `related_to`.
+### 1. Plugin SDK & Capability Sandbox (`src/lib/platform/pluginManifest.ts`, `pluginSandbox.ts`)
+- **Plugin Categories**: Data Connector, Analysis Module, Visualization, Notification Provider, Export Provider, Authentication Provider, Workflow Action, Utility.
+- **Manifest Contract**: Strict semver validation (`1.0.0`), entryPoint declaration, capability list, and permissions (`READ_NEWS`, `WRITE_REPORTS`, `EMIT_NOTIFICATIONS`, `NETWORK_OUTBOUND`, `READ_GRAPH`).
+- **Capability Sandbox**: Enforces strict permission validation before allowing filesystem, network, or data operations.
 
-### 2. Deterministic Entity Resolution (`src/lib/knowledge/entityResolver.ts`)
-- Normalizes raw name variations (`"OpenAI Inc."`, `"Open AI"`, `"OpenAI"`) $\rightarrow$ canonical `"OpenAI"`.
-- Preserves alias arrays without improper merges of distinct entities.
+### 2. Internal Event Bus (`src/lib/platform/eventBus.ts`)
+- Asynchronous publish/subscribe event bus supporting `EventClusterCreated`, `VerificationCompleted`, `AnalysisGenerated`, `InvestigationUpdated`, `TaskAssigned`, `NotificationSent`.
 
-### 3. Natural Language Intelligence Query Engine (`src/lib/knowledge/queryEngine.ts`)
-- Translates natural language queries (e.g., `"Show all verified OpenAI events"`, `"Find reports mentioning NVIDIA"`) into structured filter parameters (`category`, `entity`, `verificationStatus`).
+### 3. Visual Workflow Automation Engine (`src/lib/platform/workflow/engine.ts`)
+- Visual node-edge workflow engine supporting node execution (`TRIGGER`, `VERIFICATION`, `CONDITION`, `NOTIFICATION`, `WEBHOOK`), versioning, execution logs, and retries.
 
-### 4. Historical Intelligence Archive & Unified Timelines (`archive.ts`, `timeline.ts`)
-- Searchable historical archive repository and multi-source timeline engine merging verified events, AI reports, and investigation milestones.
+### 4. Abstracted Enterprise Integration Adapters (`src/lib/platform/integrations/`)
+- Plug-and-play adapter interface (`baseAdapter.ts`) supporting Slack, Microsoft Teams, Jira, GitHub, Email, Webhooks, and SIEM without hardcoding vendor logic into core platform.
+
+### 5. Outbound Webhook Delivery System (`src/lib/platform/webhooks.ts`)
+- Outbound webhooks with HMAC-SHA256 signature verification, delivery logs, and retries.
+
+### 6. Versioned Public API & Auth (`src/lib/platform/api/auth.ts`, `rateLimiter.ts`)
+- REST API v1 (`/api/v1/events`, `/api/v1/workflows`, `/api/v1/plugins`, `/api/v1/keys`, `/api/v1/webhooks`).
+- Bearer API token authentication, scopes (`read:events`, `write:workflows`, `admin:plugins`), and token-bucket rate limiting.
 
 ---
 
-## 📌 Knowledge Graph API Reference
+## 📌 Public API Reference (v1)
 
-### `GET /api/graph`
-Returns Knowledge Graph nodes, directed relationship edges, and executive analytics.
+### `GET /api/v1/events`
+Returns verified intelligence events (supports `Authorization: Bearer <key>`).
 
-### `GET /api/entities` & `GET /api/entities/[id]`
-Returns catalog of resolved entities and detailed entity profile node details.
+### `GET & POST /api/v1/workflows`
+Retrieve workflow definitions or trigger automated workflow executions.
 
-### `GET /api/relationships`
-Returns evidence-grounded entity relationship triples.
+### `GET & POST /api/v1/plugins`
+Retrieve or register capability-validated platform extension plugins.
 
-### `POST /api/query`
-Executes natural language intelligence queries and returns matching event clusters.
+### `GET & POST /api/v1/keys`
+Generate and list API keys and scopes.
 
-### `GET /api/archive`
-Returns historical intelligence archives.
+### `GET & POST /api/v1/webhooks`
+Dispatch signed outbound webhooks and view delivery logs.
+
+### `GET /api/developer`
+Returns developer portal metadata, platform SDK version, and rate limit specifications.
 
 ---
 
@@ -74,7 +88,7 @@ Returns historical intelligence archives.
 
 ### Run Tests
 ```bash
-# Run Vitest test suite (60 Unit & Integration tests)
+# Run Vitest test suite (65 Unit & Integration tests)
 npx vitest run
 ```
 
@@ -92,4 +106,4 @@ npm run build
 # Start local production server
 npm run start
 ```
-Open [http://localhost:3000](http://localhost:3000) to view the Executive Command Center & Graph Explorer.
+Open [http://localhost:3000](http://localhost:3000) to view the Developer Portal & Workflow Builder.

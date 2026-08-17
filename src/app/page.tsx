@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Activity, Sparkles, Network } from 'lucide-react';
+import { Activity, Sparkles, Network, Code, GitBranch, Puzzle } from 'lucide-react';
 import { usePulse } from '@/context/PulseContext';
 import EventClusterCard from '@/components/EventClusterCard';
 import EventClusterVisualizer from '@/components/EventClusterVisualizer';
@@ -22,6 +22,10 @@ import ExecutiveCommandCenter from '@/components/ExecutiveCommandCenter';
 import NaturalLanguageQueryBar from '@/components/NaturalLanguageQueryBar';
 import GraphExplorer from '@/components/GraphExplorer';
 import EntityProfileModal from '@/components/EntityProfileModal';
+import DeveloperPortal from '@/components/DeveloperPortal';
+import WorkflowBuilder from '@/components/WorkflowBuilder';
+import CustomDashboardBuilder from '@/components/CustomDashboardBuilder';
+import PluginRegistryModal from '@/components/PluginRegistryModal';
 import ActivityFeed from '@/components/ActivityFeed';
 import SourceStatusAlert from '@/components/SourceStatusAlert';
 import { EventCluster } from '@/lib/clustering/types';
@@ -71,7 +75,16 @@ export default function OverviewPage() {
     selectEntityNode,
     activeQueryResult,
     executeQuery,
-    clearQuery
+    clearQuery,
+    plugins,
+    workflows,
+    workflowExecutions,
+    apiKeys,
+    togglePlatformPlugin,
+    registerPlatformPlugin,
+    executePlatformWorkflow,
+    createPlatformWorkflow,
+    createPlatformApiKey
   } = usePulse();
 
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
@@ -81,6 +94,9 @@ export default function OverviewPage() {
   const [isInvestigationsOpen, setIsInvestigationsOpen] = useState(false);
   const [isTasksOpen, setIsTasksOpen] = useState(false);
   const [isAuditOpen, setIsAuditOpen] = useState(false);
+  const [isDevPortalOpen, setIsDevPortalOpen] = useState(false);
+  const [isWorkflowBuilderOpen, setIsWorkflowBuilderOpen] = useState(false);
+  const [isPluginsOpen, setIsPluginsOpen] = useState(false);
 
   const filteredClusters = eventClusters.filter((cluster) => {
     // 1. Natural language query result match
@@ -132,26 +148,55 @@ export default function OverviewPage() {
         unreadNotificationsCount={unreadNotificationsCount}
       />
 
-      {/* Overview Header with Workspace Switcher */}
+      {/* Overview Header with Workspace Switcher & Developer Platform Buttons */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-zinc-900 pb-4 gap-4 font-mono">
         <div>
           <h1 className="text-xl font-bold tracking-tight text-zinc-100 flex items-center gap-2">
             <Network className="w-5 h-5 text-indigo-400" />
-            INTELLIGENCE OPERATING SYSTEM — EXECUTIVE COMMAND CENTER
+            EXTENSIBLE INTELLIGENCE PLATFORM — COMMAND CENTER
           </h1>
           <p className="text-xs text-zinc-500">
             OPERATOR: {userProfile?.name.toUpperCase() || 'ANALYST'} {'//'} ORG: {organization?.name.toUpperCase() || 'NEWSPULSE GLOBAL'} {'//'} WORKSPACE: {activeWorkspace?.name.toUpperCase() || 'PERSONAL'}
           </p>
         </div>
 
-        {userProfile && activeWorkspace && (
-          <WorkspaceSwitcher
-            workspaces={userProfile.workspaces}
-            activeWorkspace={activeWorkspace}
-            onSwitchWorkspace={switchActiveWorkspace}
-          />
-        )}
+        <div className="flex items-center gap-2 flex-wrap">
+          <button
+            onClick={() => setIsDevPortalOpen(true)}
+            className="px-3 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 border border-indigo-500/30 text-indigo-300 font-bold text-xs transition-colors flex items-center gap-1.5"
+          >
+            <Code className="w-3.5 h-3.5" />
+            <span>Developer Portal</span>
+          </button>
+
+          <button
+            onClick={() => setIsWorkflowBuilderOpen(true)}
+            className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 font-bold text-xs transition-colors flex items-center gap-1.5"
+          >
+            <GitBranch className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Workflow Engine</span>
+          </button>
+
+          <button
+            onClick={() => setIsPluginsOpen(true)}
+            className="px-3 py-1.5 rounded-lg bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-300 font-bold text-xs transition-colors flex items-center gap-1.5"
+          >
+            <Puzzle className="w-3.5 h-3.5 text-indigo-400" />
+            <span>Plugins ({plugins.length})</span>
+          </button>
+
+          {userProfile && activeWorkspace && (
+            <WorkspaceSwitcher
+              workspaces={userProfile.workspaces}
+              activeWorkspace={activeWorkspace}
+              onSwitchWorkspace={switchActiveWorkspace}
+            />
+          )}
+        </div>
       </div>
+
+      {/* Phase 11 Custom Dashboard Layout Builder Controls */}
+      <CustomDashboardBuilder />
 
       {/* Phase 10 Executive Command Center */}
       <ExecutiveCommandCenter
@@ -290,6 +335,33 @@ export default function OverviewPage() {
           setIsEntityProfileOpen(false);
           handleSelectCluster(cluster);
         }}
+      />
+
+      {/* Phase 11 Developer Portal Modal */}
+      <DeveloperPortal
+        isOpen={isDevPortalOpen}
+        onClose={() => setIsDevPortalOpen(false)}
+        apiKeys={apiKeys}
+        onCreateApiKey={createPlatformApiKey}
+      />
+
+      {/* Phase 11 Visual Workflow Automation Builder Modal */}
+      <WorkflowBuilder
+        isOpen={isWorkflowBuilderOpen}
+        onClose={() => setIsWorkflowBuilderOpen(false)}
+        workflows={workflows}
+        executions={workflowExecutions}
+        onExecuteWorkflow={executePlatformWorkflow}
+        onCreateWorkflow={createPlatformWorkflow}
+      />
+
+      {/* Phase 11 Plugin Registry Catalog Modal */}
+      <PluginRegistryModal
+        isOpen={isPluginsOpen}
+        onClose={() => setIsPluginsOpen(false)}
+        plugins={plugins}
+        onToggleStatus={togglePlatformPlugin}
+        onRegisterPlugin={registerPlatformPlugin}
       />
 
       {/* Notifications Drawer */}
