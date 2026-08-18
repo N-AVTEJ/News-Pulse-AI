@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Activity, Server, Cpu, Database, RefreshCw, AlertTriangle } from 'lucide-react';
+import { X, Activity, Server, Database, RefreshCw } from 'lucide-react';
 import { ApplicationMetrics } from '@/lib/observability/metrics';
 
 interface SystemStatusModalProps {
@@ -39,9 +39,20 @@ export default function SystemStatusModal({ isOpen, onClose }: SystemStatusModal
   };
 
   useEffect(() => {
+    let active = true;
     if (isOpen) {
-      fetchHealth();
+      fetch('/api/health')
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (active && data) {
+            setHealth(data);
+          }
+        })
+        .catch(err => console.error('[SystemStatusModal] Mount health fetch failed:', err));
     }
+    return () => {
+      active = false;
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;
