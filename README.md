@@ -4,106 +4,97 @@ NewsPulse AI is an autonomous multi-agent news intelligence platform designed to
 
 ---
 
-## ⚡ Extensible Intelligence Platform Architecture (Phases 1–11)
+## ⚡ Production Intelligence Platform Architecture (Phases 1–12)
 
 ```
-                     EVENTS, VERIFICATION, & KNOWLEDGE GRAPH (Phases 1–10)
-                                │
-                                ▼
-                       INTERNAL EVENT BUS
-         (EventClusterCreated, VerificationCompleted, TaskAssigned)
-                                │
-                                ▼
-               PLUGIN SDK & CAPABILITY-BASED SANDBOX
-         (Data Connectors, Analysis Modules, Workflow Actions)
-                                │
-                                ▼
-              VISUAL WORKFLOW AUTOMATION ENGINE
-            (Triggers ➔ Conditions ➔ Actions ➔ Webhooks)
-                                │
-                                ▼
-                 ENTERPRISE INTEGRATION ADAPTERS
-              (Slack, Teams, Jira, GitHub, SIEM, Webhooks)
-                                │
-                                ▼
-             VERSIONED PUBLIC API PLATFORM & AUTH
-                (API Keys, Rate Limiting, SDKs)
-                                │
-                                ▼
-          DEVELOPER PORTAL & CUSTOM DASHBOARD BUILDER (UI)
+                            INCOMING REQUESTS & API CLIENTS
+                                          │
+                                          ▼
+                              SECURITY & HEADERS MIDDLEWARE
+                         (CSP, HSTS, X-Content-Type-Options, CORS)
+                                          │
+                                          ▼
+                            CORRELATION & STRUCTURED LOGGER
+                            (requestId, runId, timestamps)
+                                          │
+                                          ▼
+            ┌─────────────────────────────┼─────────────────────────────┐
+            ▼                             ▼                             ▼
+    HEALTH CHECKS                  CORE APPLICATION             METRICS TELEMETRY
+(/live, /ready, /health)         (APIs, UI, Scouts)        (Latency, Ingestion, Errors)
+            │                             │                             │
+            ▼                             ▼                             ▼
+    QUEUE & SCHEDULER             KNOWLEDGE & GRAPH             INCIDENT RUNBOOKS &
+ (Dead-letter, Locks)           (Sandboxed Plugins)             BACKUP PROCEDURES
 ```
 
 ---
 
-## 🛠 Phase 11: Platform SDK, Automation Builder & Enterprise Integrations
+## 🛠 Phase 12: Production Infrastructure, Security & Observability
 
-Phase 11 transforms NewsPulse AI into an extensible, enterprise-grade intelligence platform.
+Phase 12 hardens NewsPulse AI with enterprise-grade production engineering, reliability, and observability tooling.
 
-### 1. Plugin SDK & Capability Sandbox (`src/lib/platform/pluginManifest.ts`, `pluginSandbox.ts`)
-- **Plugin Categories**: Data Connector, Analysis Module, Visualization, Notification Provider, Export Provider, Authentication Provider, Workflow Action, Utility.
-- **Manifest Contract**: Strict semver validation (`1.0.0`), entryPoint declaration, capability list, and permissions (`READ_NEWS`, `WRITE_REPORTS`, `EMIT_NOTIFICATIONS`, `NETWORK_OUTBOUND`, `READ_GRAPH`).
-- **Capability Sandbox**: Enforces strict permission validation before allowing filesystem, network, or data operations.
+### 1. Structured Logging & Request Correlation (`src/lib/observability/logger.ts`, `correlation.ts`)
+- Structured JSON logging containing `timestamp`, `level`, `service`, `requestId`, `runId`, `event`, `durationMs`, and `status`.
+- Automated sensitive field sanitizer redacting passwords, authorization headers, raw API keys, and secret tokens.
 
-### 2. Internal Event Bus (`src/lib/platform/eventBus.ts`)
-- Asynchronous publish/subscribe event bus supporting `EventClusterCreated`, `VerificationCompleted`, `AnalysisGenerated`, `InvestigationUpdated`, `TaskAssigned`, `NotificationSent`.
+### 2. Standardized Production Health Probes (`src/app/api/health/`)
+- `GET /api/health/live`: Fast, non-blocking liveness probe.
+- `GET /api/health/ready`: Readiness probe verifying memory headroom, worker pools, and storage.
+- `GET /api/health`: Deep diagnostics inspecting News Ingestion, Verification Engine, AI Analysis, Knowledge Graph, Schedulers, and Job Queue.
 
-### 3. Visual Workflow Automation Engine (`src/lib/platform/workflow/engine.ts`)
-- Visual node-edge workflow engine supporting node execution (`TRIGGER`, `VERIFICATION`, `CONDITION`, `NOTIFICATION`, `WEBHOOK`), versioning, execution logs, and retries.
+### 3. Application Metrics Engine (`src/lib/observability/metrics.ts`, `GET /api/metrics`)
+- Real-time counters and latency aggregations tracking requests, route usage, ingested stories, formed clusters, verification runs, AI reports, queue depths, and webhook dispatches.
 
-### 4. Abstracted Enterprise Integration Adapters (`src/lib/platform/integrations/`)
-- Plug-and-play adapter interface (`baseAdapter.ts`) supporting Slack, Microsoft Teams, Jira, GitHub, Email, Webhooks, and SIEM without hardcoding vendor logic into core platform.
+### 4. Hardened Queue & Scheduler Reliability (`src/lib/runtime/queueReliability.ts`, `schedulerLock.ts`)
+- Exponential backoff retry policies.
+- Dead-Letter Queue (DLQ) state transitions for poison-pill or persistent failures.
+- Idempotency key tracking preventing duplicate processing.
+- Distributed scheduler execution lock preventing concurrent cron sweeps.
 
-### 5. Outbound Webhook Delivery System (`src/lib/platform/webhooks.ts`)
-- Outbound webhooks with HMAC-SHA256 signature verification, delivery logs, and retries.
+### 5. Production Security & Safe Error Handling (`src/lib/observability/errorHandler.ts`, `next.config.ts`)
+- Standardized API error responses `{ code, message, requestId, timestamp }` with zero stack trace exposure in production.
+- Production security headers (`X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Permissions-Policy`).
 
-### 6. Versioned Public API & Auth (`src/lib/platform/api/auth.ts`, `rateLimiter.ts`)
-- REST API v1 (`/api/v1/events`, `/api/v1/workflows`, `/api/v1/plugins`, `/api/v1/keys`, `/api/v1/webhooks`).
-- Bearer API token authentication, scopes (`read:events`, `write:workflows`, `admin:plugins`), and token-bucket rate limiting.
+### 6. Documentation Suite (`docs/`)
+- `docs/architecture-audit.md`: Detailed architecture inventory, dependencies, and risk analysis.
+- `docs/backup-and-recovery.md`: Documented backup cadence, retention policies, and disaster recovery procedures.
+- `docs/operations-runbook.md`: Incident severity definitions and standard operating procedures (SOPs).
+- `docs/production-readiness.md`: Truthful, verified production readiness assessment report.
+- `.github/workflows/ci.yml`: Automated CI pipeline running linting, typechecking, Vitest tests, and production build.
 
 ---
 
 ## 📌 Public API Reference (v1)
 
-### `GET /api/v1/events`
-Returns verified intelligence events (supports `Authorization: Bearer <key>`).
+### Health & Observability
+- `GET /api/health`: Comprehensive dependency health diagnostics.
+- `GET /api/health/live`: Kubernetes/Docker liveness probe.
+- `GET /api/health/ready`: Kubernetes/Docker readiness probe.
+- `GET /api/metrics`: Application metrics telemetry snapshot.
 
-### `GET & POST /api/v1/workflows`
-Retrieve workflow definitions or trigger automated workflow executions.
-
-### `GET & POST /api/v1/plugins`
-Retrieve or register capability-validated platform extension plugins.
-
-### `GET & POST /api/v1/keys`
-Generate and list API keys and scopes.
-
-### `GET & POST /api/v1/webhooks`
-Dispatch signed outbound webhooks and view delivery logs.
-
-### `GET /api/developer`
-Returns developer portal metadata, platform SDK version, and rate limit specifications.
+### Core Intelligence
+- `GET /api/v1/events`: Verified intelligence event clusters (supports `Authorization: Bearer <key>`).
+- `GET & POST /api/v1/workflows`: Workflow automation engine triggers and execution logs.
+- `GET & POST /api/v1/plugins`: Capability-sandboxed plugin registry.
+- `GET & POST /api/v1/keys`: API Key generator and scope manager.
+- `GET & POST /api/v1/webhooks`: Signed outbound webhook dispatcher.
 
 ---
 
-## 🚀 Getting Started & Testing
+## 🚀 Getting Started & Verification
 
-### Run Tests
 ```bash
-# Run Vitest test suite (65 Unit & Integration tests)
+# Run complete test suite (69 Unit & Integration tests)
 npx vitest run
-```
 
-### Run Linter & Build
-```bash
-# Run ESLint
+# Run ESLint check
 npm run lint
 
 # Build production bundle
 npm run build
-```
 
-### Start Server
-```bash
-# Start local production server
+# Start production server
 npm run start
 ```
-Open [http://localhost:3000](http://localhost:3000) to view the Developer Portal & Workflow Builder.
+Open [http://localhost:3000](http://localhost:3000) and click **"System Health"** in the top bar to inspect live operational diagnostics.

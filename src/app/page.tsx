@@ -26,6 +26,7 @@ import DeveloperPortal from '@/components/DeveloperPortal';
 import WorkflowBuilder from '@/components/WorkflowBuilder';
 import CustomDashboardBuilder from '@/components/CustomDashboardBuilder';
 import PluginRegistryModal from '@/components/PluginRegistryModal';
+import SystemStatusModal from '@/components/SystemStatusModal';
 import ActivityFeed from '@/components/ActivityFeed';
 import SourceStatusAlert from '@/components/SourceStatusAlert';
 import { EventCluster } from '@/lib/clustering/types';
@@ -97,6 +98,7 @@ export default function OverviewPage() {
   const [isDevPortalOpen, setIsDevPortalOpen] = useState(false);
   const [isWorkflowBuilderOpen, setIsWorkflowBuilderOpen] = useState(false);
   const [isPluginsOpen, setIsPluginsOpen] = useState(false);
+  const [isSystemStatusOpen, setIsSystemStatusOpen] = useState(false);
 
   const filteredClusters = eventClusters.filter((cluster) => {
     // 1. Natural language query result match
@@ -183,6 +185,14 @@ export default function OverviewPage() {
           >
             <Puzzle className="w-3.5 h-3.5 text-indigo-400" />
             <span>Plugins ({plugins.length})</span>
+          </button>
+
+          <button
+            onClick={() => setIsSystemStatusOpen(true)}
+            className="px-3 py-1.5 rounded-lg bg-emerald-950/30 hover:bg-emerald-950/50 border border-emerald-500/30 text-emerald-400 font-bold text-xs transition-colors flex items-center gap-1.5"
+          >
+            <Activity className="w-3.5 h-3.5 text-emerald-400" />
+            <span>System Health</span>
           </button>
 
           {userProfile && activeWorkspace && (
@@ -421,6 +431,12 @@ export default function OverviewPage() {
       <AuditLogModal
         isOpen={isAuditOpen}
         onClose={() => setIsAuditOpen(false)}
+      />
+
+      {/* Phase 12 Operational Diagnostics & System Health Modal */}
+      <SystemStatusModal
+        isOpen={isSystemStatusOpen}
+        onClose={() => setIsSystemStatusOpen(false)}
       />
 
     </div>
