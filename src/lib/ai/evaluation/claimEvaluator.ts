@@ -37,7 +37,7 @@ export function evaluateClaims(
   const sourceCorpus = [
     cluster.canonicalHeadline,
     cluster.summary,
-    ...cluster.articles.map(a => `${a.title} ${a.description} ${a.contentSnippet || ''}`)
+    ...(cluster.stories || []).map(a => `${a.title} ${a.description} ${a.contentSnippet || ''}`)
   ].join(' ').toLowerCase();
 
   const unsupportedClaims: string[] = [];
