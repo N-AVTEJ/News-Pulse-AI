@@ -8,7 +8,7 @@ describe('Citation Evaluator', () => {
     clusterId: 'cluster_test_2',
     canonicalHeadline: 'Federal Reserve Holds Interest Rates Steady',
     summary: 'The central bank maintained benchmark interest rates following monthly policy meeting.',
-    articles: [
+    stories: [
       {
         id: 'fed_story_1',
         title: 'Fed holds rates steady in March meeting',
@@ -24,11 +24,26 @@ describe('Citation Evaluator', () => {
     ],
     primaryCategory: 'BUSINESS',
     publishers: ['Bloomberg'],
-    firstSeenAt: '2026-03-20T14:00:00Z',
-    lastUpdatedAt: '2026-03-20T14:00:00Z',
     storyCount: 1,
-    geographicScope: 'NATIONAL',
-    temporalRange: { start: '2026-03-20T14:00:00Z', end: '2026-03-20T14:00:00Z' }
+    publisherCount: 1,
+    firstPublished: '2026-03-20T14:00:00Z',
+    latestPublished: '2026-03-20T14:00:00Z',
+    matchedScouts: ['business-scout'],
+    matchedSignals: ['Rates'],
+    perScoutScores: { 'business-scout': 85 },
+    topSelectionScore: 85,
+    selectionReason: 'Key rate update',
+    status: 'ACTIVE',
+    clusterReason: 'Fed meeting report',
+    clusterBreakdown: {
+      headlineSimilarity: 40,
+      entityOverlap: 30,
+      timeProximity: 20,
+      categoryMatch: 10,
+      totalScore: 100
+    },
+    importanceScore: null,
+    verificationScore: null
   };
 
   it('validates citations referencing authentic stories with matching quotes', () => {

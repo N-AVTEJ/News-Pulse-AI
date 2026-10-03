@@ -8,7 +8,7 @@ describe('Grounding Evaluator', () => {
     clusterId: 'cluster_test_1',
     canonicalHeadline: 'Nvidia Unveils Next-Gen Blackwell Architecture for AI Datacenters',
     summary: 'Nvidia announced new GPU systems designed to accelerate large scale neural networks.',
-    articles: [
+    stories: [
       {
         id: 'story_1',
         title: 'Nvidia Blackwell GPUs announced at GTC',
@@ -25,11 +25,26 @@ describe('Grounding Evaluator', () => {
     ],
     primaryCategory: 'TECHNOLOGY',
     publishers: ['TechCrunch'],
-    firstSeenAt: '2026-03-18T10:00:00Z',
-    lastUpdatedAt: '2026-03-18T10:00:00Z',
     storyCount: 1,
-    geographicScope: 'GLOBAL',
-    temporalRange: { start: '2026-03-18T10:00:00Z', end: '2026-03-18T10:00:00Z' }
+    publisherCount: 1,
+    firstPublished: '2026-03-18T10:00:00Z',
+    latestPublished: '2026-03-18T10:00:00Z',
+    matchedScouts: ['tech-scout'],
+    matchedSignals: ['GPU', 'Hardware'],
+    perScoutScores: { 'tech-scout': 90 },
+    topSelectionScore: 90,
+    selectionReason: 'Key hardware announcement',
+    status: 'ACTIVE',
+    clusterReason: 'Single hardware report',
+    clusterBreakdown: {
+      headlineSimilarity: 40,
+      entityOverlap: 30,
+      timeProximity: 20,
+      categoryMatch: 10,
+      totalScore: 100
+    },
+    importanceScore: null,
+    verificationScore: null
   };
 
   it('awards HIGH score to report grounded strictly in cluster evidence', () => {
