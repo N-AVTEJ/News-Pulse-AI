@@ -62,11 +62,12 @@ describe('AI Report Quality Gate', () => {
       citations: [
         {
           id: 'cite_1',
-          statement: 'Quantum error correction demonstrated',
-          sourceName: 'Nature News',
           storyId: 'qc_story_1',
-          url: 'https://nature.com/quantum',
-          quote: 'quantum error correction'
+          publisherName: 'Nature News',
+          articleUrl: 'https://nature.com/quantum',
+          headline: 'Quantum computing milestone reached',
+          publishedAt: '2026-04-01T12:00:00Z',
+          quoteSnippet: 'quantum error correction'
         }
       ],
       confidenceScore: 92,
@@ -93,11 +94,12 @@ describe('AI Report Quality Gate', () => {
       citations: [
         {
           id: 'cite_bad',
-          statement: 'Recall announced',
-          sourceName: 'FakeAuto',
           storyId: 'story_ghost_id',
-          url: 'https://fake.com',
-          quote: 'fake cars'
+          publisherName: 'FakeAuto',
+          articleUrl: 'https://fake.com',
+          headline: 'Car recall announced',
+          publishedAt: '2026-04-01T12:00:00Z',
+          quoteSnippet: 'fake cars'
         }
       ],
       confidenceScore: 20,
