@@ -43,12 +43,12 @@ export function evaluateGrounding(
 
   // 2. Extract generated tokens from report sections
   const reportText = [
-    report.whatHappened,
+    report.executiveSummary,
     report.whyItMatters,
-    report.whoIsAffected,
-    report.whatChanged,
-    report.whatIsUncertain,
-    ...report.keyFacts
+    report.timelineSummary,
+    ...(report.keyDevelopments || []),
+    ...(report.knownFacts || []),
+    ...(report.affectedOrganizations || [])
   ].join(' ');
   const generatedTokens = tokenize(reportText);
 

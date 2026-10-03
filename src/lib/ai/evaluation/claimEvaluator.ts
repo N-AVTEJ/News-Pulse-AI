@@ -17,10 +17,10 @@ export function evaluateClaims(
     };
   }
 
-  // Aggregate candidate claim statements from keyFacts & whatHappened
+  // Aggregate candidate claim statements from knownFacts & keyDevelopments
   const candidateClaims: string[] = [
-    ...(report.keyFacts || []),
-    ...(report.whatChanged ? [report.whatChanged] : [])
+    ...(report.knownFacts || []),
+    ...(report.keyDevelopments || [])
   ].filter(c => c.trim().length > 10);
 
   if (candidateClaims.length === 0) {
