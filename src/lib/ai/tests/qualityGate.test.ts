@@ -8,7 +8,7 @@ describe('AI Report Quality Gate', () => {
     clusterId: 'cluster_gate_1',
     canonicalHeadline: 'Quantum Computing Lab Achieves 1000 Logical Qubits Milestone',
     summary: 'Researchers demonstrate fault-tolerant quantum error correction in cryogenic laboratory.',
-    articles: [
+    stories: [
       {
         id: 'qc_story_1',
         title: 'Quantum computing milestone reached',
@@ -25,11 +25,26 @@ describe('AI Report Quality Gate', () => {
     ],
     primaryCategory: 'TECHNOLOGY',
     publishers: ['Nature News'],
-    firstSeenAt: '2026-04-01T12:00:00Z',
-    lastUpdatedAt: '2026-04-01T12:00:00Z',
     storyCount: 1,
-    geographicScope: 'GLOBAL',
-    temporalRange: { start: '2026-04-01T12:00:00Z', end: '2026-04-01T12:00:00Z' }
+    publisherCount: 1,
+    firstPublished: '2026-04-01T12:00:00Z',
+    latestPublished: '2026-04-01T12:00:00Z',
+    matchedScouts: ['tech-scout'],
+    matchedSignals: ['Quantum'],
+    perScoutScores: { 'tech-scout': 95 },
+    topSelectionScore: 95,
+    selectionReason: 'Milestone science breakthrough',
+    status: 'ACTIVE',
+    clusterReason: 'Single report on qubit record',
+    clusterBreakdown: {
+      headlineSimilarity: 40,
+      entityOverlap: 30,
+      timeProximity: 20,
+      categoryMatch: 10,
+      totalScore: 100
+    },
+    importanceScore: null,
+    verificationScore: null
   };
 
   it('approves publication for highly grounded, citation-verified report', () => {
