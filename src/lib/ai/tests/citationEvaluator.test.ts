@@ -49,14 +49,21 @@ describe('Citation Evaluator', () => {
   it('validates citations referencing authentic stories with matching quotes', () => {
     const report: AnalysisReport = {
       clusterId: 'cluster_test_2',
-      whatHappened: 'Federal reserve held benchmark rates.',
+      executiveSummary: 'Federal reserve held benchmark rates.',
+      keyDevelopments: ['Rates held steady'],
       whyItMatters: 'Economic stability.',
-      whoIsAffected: 'Borrowers.',
-      whatChanged: 'No rate changes.',
-      whatIsUncertain: 'Future inflation path.',
-      keyFacts: ['Rates steady'],
-      timeline: [],
+      affectedOrganizations: ['Borrowers and banks'],
+      potentialImpact: [],
+      timelineSummary: 'Decision announced Wednesday.',
+      knownFacts: ['Rates steady'],
+      remainingUncertainty: [],
       entities: [],
+      entityRelationships: [],
+      relatedEvents: [],
+      provider: 'test-model',
+      durationMs: 300,
+      validationPassed: true,
+      validationNotes: [],
       citations: [
         {
           id: 'cite_1',
@@ -68,7 +75,6 @@ describe('Citation Evaluator', () => {
           quoteSnippet: 'rate target remains between 5.25% and 5.50%'
         }
       ],
-      confidenceScore: 95,
       generatedAt: '2026-03-20T14:10:00Z'
     };
 
@@ -81,14 +87,21 @@ describe('Citation Evaluator', () => {
   it('detects hallucinated citations with non-existent story IDs', () => {
     const report: AnalysisReport = {
       clusterId: 'cluster_test_2',
-      whatHappened: 'Federal reserve held benchmark rates.',
+      executiveSummary: 'Federal reserve held benchmark rates.',
+      keyDevelopments: ['Rates held steady'],
       whyItMatters: 'Economic stability.',
-      whoIsAffected: 'Borrowers.',
-      whatChanged: 'No rate changes.',
-      whatIsUncertain: 'Future inflation path.',
-      keyFacts: ['Rates steady'],
-      timeline: [],
+      affectedOrganizations: ['Borrowers and banks'],
+      potentialImpact: [],
+      timelineSummary: 'Decision announced Wednesday.',
+      knownFacts: ['Rates steady'],
+      remainingUncertainty: [],
       entities: [],
+      entityRelationships: [],
+      relatedEvents: [],
+      provider: 'test-model',
+      durationMs: 300,
+      validationPassed: true,
+      validationNotes: [],
       citations: [
         {
           id: 'cite_fake',
@@ -100,7 +113,6 @@ describe('Citation Evaluator', () => {
           quoteSnippet: 'imaginary non-existent quote'
         }
       ],
-      confidenceScore: 40,
       generatedAt: '2026-03-20T14:10:00Z'
     };
 
