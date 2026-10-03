@@ -27,6 +27,7 @@ import WorkflowBuilder from '@/components/WorkflowBuilder';
 import CustomDashboardBuilder from '@/components/CustomDashboardBuilder';
 import PluginRegistryModal from '@/components/PluginRegistryModal';
 import SystemStatusModal from '@/components/SystemStatusModal';
+import AIQualityModal from '@/components/AIQualityModal';
 import ActivityFeed from '@/components/ActivityFeed';
 import SourceStatusAlert from '@/components/SourceStatusAlert';
 import { EventCluster } from '@/lib/clustering/types';
@@ -99,6 +100,7 @@ export default function OverviewPage() {
   const [isWorkflowBuilderOpen, setIsWorkflowBuilderOpen] = useState(false);
   const [isPluginsOpen, setIsPluginsOpen] = useState(false);
   const [isSystemStatusOpen, setIsSystemStatusOpen] = useState(false);
+  const [isAIQualityOpen, setIsAIQualityOpen] = useState(false);
 
   const filteredClusters = eventClusters.filter((cluster) => {
     // 1. Natural language query result match
