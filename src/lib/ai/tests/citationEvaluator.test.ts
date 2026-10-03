@@ -60,11 +60,12 @@ describe('Citation Evaluator', () => {
       citations: [
         {
           id: 'cite_1',
-          statement: 'Target remains between 5.25% and 5.50%',
-          sourceName: 'Bloomberg',
           storyId: 'fed_story_1',
-          url: 'https://bloomberg.com/fed-rates',
-          quote: 'rate target remains between 5.25% and 5.50%'
+          publisherName: 'Bloomberg',
+          articleUrl: 'https://bloomberg.com/fed-rates',
+          headline: 'Fed holds rates steady in March meeting',
+          publishedAt: '2026-03-20T14:00:00Z',
+          quoteSnippet: 'rate target remains between 5.25% and 5.50%'
         }
       ],
       confidenceScore: 95,
@@ -91,11 +92,12 @@ describe('Citation Evaluator', () => {
       citations: [
         {
           id: 'cite_fake',
-          statement: 'Fabricated claim from imaginary publication',
-          sourceName: 'NonExistentNews',
           storyId: 'story_does_not_exist',
-          url: 'https://fake.com/story',
-          quote: 'imaginary non-existent quote'
+          publisherName: 'NonExistentNews',
+          articleUrl: 'https://fake.com/story',
+          headline: 'Fake headline',
+          publishedAt: '2026-03-20T14:00:00Z',
+          quoteSnippet: 'imaginary non-existent quote'
         }
       ],
       confidenceScore: 40,

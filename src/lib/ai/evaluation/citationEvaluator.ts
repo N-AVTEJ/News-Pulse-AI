@@ -33,16 +33,16 @@ export function evaluateCitations(
 
   for (const citation of report.citations) {
     const isIdValid = validStoryIds.has(citation.storyId);
-    const isPublisherValid = validSourceNames.has(citation.sourceName.toLowerCase());
+    const isPublisherValid = validSourceNames.has((citation.publisherName || '').toLowerCase());
     
-    // Check if the cited quote actually exists in the text
-    const quoteClean = (citation.quote || '').trim().toLowerCase();
+    // Check if the cited quote snippet actually exists in the text
+    const quoteClean = (citation.quoteSnippet || '').trim().toLowerCase();
     const quoteExists = quoteClean.length === 0 || aggregatedSourceText.includes(quoteClean);
 
     if ((isIdValid || isPublisherValid) && quoteExists) {
       verifiedCitationIds.push(citation.id);
     } else {
-      hallucinatedSourceIds.push(citation.storyId || citation.sourceName);
+      hallucinatedSourceIds.push(citation.storyId || citation.publisherName || 'unknown');
     }
   }
 
