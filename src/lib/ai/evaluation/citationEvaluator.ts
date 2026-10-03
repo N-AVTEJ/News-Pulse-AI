@@ -24,7 +24,7 @@ export function evaluateCitations(
   
   // Aggregate source text for quote verification
   const aggregatedSourceText = (cluster.stories || [])
-    .map(a => `${a.title} ${a.description} ${a.contentSnippet || ''}`)
+    .map(a => `${a.headline} ${a.summary}`)
     .join(' ')
     .toLowerCase();
 
