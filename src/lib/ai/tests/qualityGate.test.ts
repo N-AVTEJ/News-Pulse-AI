@@ -49,16 +49,23 @@ describe('AI Report Quality Gate', () => {
   it('approves publication for highly grounded, citation-verified report', () => {
     const validReport: AnalysisReport = {
       clusterId: 'cluster_gate_1',
-      whatHappened: 'Researchers demonstrated fault-tolerant quantum error correction in laboratory trials.',
+      executiveSummary: 'Researchers demonstrated fault-tolerant quantum error correction in laboratory trials.',
+      keyDevelopments: ['1000 logical qubits achieved', 'Demonstrated quantum error correction'],
       whyItMatters: 'Progress toward practical quantum computers.',
-      whoIsAffected: 'Cryptographers and physicists.',
-      whatChanged: 'Logical qubit threshold increased.',
-      whatIsUncertain: 'Scalability outside laboratory conditions.',
-      keyFacts: ['1000 logical qubits achieved', 'Demonstrated quantum error correction'],
-      timeline: [],
+      affectedOrganizations: ['Cryptographers and physicists'],
+      potentialImpact: [],
+      timelineSummary: 'Milestone published this morning.',
+      knownFacts: ['1000 logical qubits achieved', 'Demonstrated quantum error correction'],
+      remainingUncertainty: [],
       entities: [
-        { name: 'Nature News', type: 'ORGANIZATION', mentions: 1, role: 'Reporting publisher' }
+        { id: 'e1', name: 'Nature News', category: 'ORGANIZATION', mentionCount: 1, sourceArticles: ['qc_story_1'] }
       ],
+      entityRelationships: [],
+      relatedEvents: [],
+      provider: 'test-model',
+      durationMs: 300,
+      validationPassed: true,
+      validationNotes: [],
       citations: [
         {
           id: 'cite_1',
@@ -70,7 +77,6 @@ describe('AI Report Quality Gate', () => {
           quoteSnippet: 'quantum error correction'
         }
       ],
-      confidenceScore: 92,
       generatedAt: '2026-04-01T12:10:00Z'
     };
 
@@ -83,14 +89,21 @@ describe('AI Report Quality Gate', () => {
   it('rejects publication when hallucinated citations and ungrounded statements are found', () => {
     const invalidReport: AnalysisReport = {
       clusterId: 'cluster_gate_1',
-      whatHappened: 'Automotive company recalled electric vehicles due to brake failure.',
+      executiveSummary: 'Automotive company recalled electric vehicles due to brake failure.',
+      keyDevelopments: ['Car recall announced'],
       whyItMatters: 'Safety issue on highways.',
-      whoIsAffected: 'Drivers in Europe.',
-      whatChanged: 'Production halted.',
-      whatIsUncertain: 'Repair cost.',
-      keyFacts: ['Car recall announced'],
-      timeline: [],
+      affectedOrganizations: ['Drivers in Europe'],
+      potentialImpact: [],
+      timelineSummary: 'Recall announced yesterday.',
+      knownFacts: ['Car recall announced'],
+      remainingUncertainty: [],
       entities: [],
+      entityRelationships: [],
+      relatedEvents: [],
+      provider: 'test-model',
+      durationMs: 300,
+      validationPassed: true,
+      validationNotes: [],
       citations: [
         {
           id: 'cite_bad',
@@ -102,7 +115,6 @@ describe('AI Report Quality Gate', () => {
           quoteSnippet: 'fake cars'
         }
       ],
-      confidenceScore: 20,
       generatedAt: '2026-04-01T12:10:00Z'
     };
 
