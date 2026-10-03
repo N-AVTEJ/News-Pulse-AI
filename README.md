@@ -30,6 +30,36 @@ NewsPulse AI is an autonomous multi-agent news intelligence platform designed to
 
 ---
 
+## 🛠 Phase 13: AI Evaluation, Model Routing & Intelligence Quality
+
+Phase 13 establishes a quality-control and evaluation framework for intelligence reports:
+
+### 1. Grounding & Lexical Overlap Evaluator (`src/lib/ai/evaluation/groundingEvaluator.ts`)
+- Evaluates synthesized report sections against source article tokens.
+- Measures entity coverage and flags hallucinated entities or unsupported topics.
+
+### 2. Citation Verification Engine (`src/lib/ai/evaluation/citationEvaluator.ts`)
+- Verifies that cited story IDs and quotes exist within the cluster's raw stories.
+- Detects hallucinated publisher attributions or forged quotes.
+
+### 3. Claim Evaluator (`src/lib/ai/evaluation/claimEvaluator.ts`)
+- Extracts key factual claims from reports and validates source corpus alignment.
+- Flags uncorroborated assertions.
+
+### 4. Publication Quality Gate (`src/lib/ai/evaluation/qualityGate.ts`)
+- Deterministic decision boundaries: `PUBLISH` ($\ge 70$), `FLAG_FOR_REVIEW` ($50-69$), `REJECT` ($< 50$ or hallucinated citations).
+- Prevents low-fidelity or ungrounded reports from publishing.
+
+### 5. Dynamic Task-Based Model Router (`src/lib/ai/router.ts`, `models.ts`)
+- Routes intelligence tasks by complexity: `DEEP_ANALYSIS` $\rightarrow$ REASONING tier (`gemini-1.5-pro`), `CLAIM_EXTRACTION` $\rightarrow$ BALANCED tier (`gpt-4o-mini`), `SUMMARY` $\rightarrow$ FAST tier (`gemini-2.0-flash`).
+- Supports offline fallback to `deterministic-local-scout`.
+
+### 6. Golden Benchmark Regression Suite & Telemetry (`src/lib/ai/evaluation/regression.ts`, `telemetry.ts`)
+- Tracks performance regressions against established baseline intelligence reports.
+- Real-time token usage, latency, and cost telemetry.
+
+---
+
 ## 🛠 Phase 12: Production Infrastructure, Security & Observability
 
 Phase 12 hardens NewsPulse AI with enterprise-grade production engineering, reliability, and observability tooling.
