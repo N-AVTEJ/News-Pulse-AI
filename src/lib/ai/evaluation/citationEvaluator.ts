@@ -19,11 +19,11 @@ export function evaluateCitations(
   }
 
   // Set of valid story and source IDs present in this cluster
-  const validStoryIds = new Set(cluster.articles.map(a => a.id));
-  const validSourceNames = new Set(cluster.publishers.map(p => p.toLowerCase()));
+  const validStoryIds = new Set((cluster.stories || []).map(a => a.id));
+  const validSourceNames = new Set((cluster.publishers || []).map(p => p.toLowerCase()));
   
   // Aggregate source text for quote verification
-  const aggregatedSourceText = cluster.articles
+  const aggregatedSourceText = (cluster.stories || [])
     .map(a => `${a.title} ${a.description} ${a.contentSnippet || ''}`)
     .join(' ')
     .toLowerCase();

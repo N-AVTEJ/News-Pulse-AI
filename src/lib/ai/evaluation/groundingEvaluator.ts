@@ -37,7 +37,7 @@ export function evaluateGrounding(
   const sourceText = [
     cluster.canonicalHeadline,
     cluster.summary,
-    ...cluster.articles.map(a => `${a.title} ${a.description} ${a.contentSnippet || ''}`)
+    ...(cluster.stories || []).map(a => `${a.title} ${a.description} ${a.contentSnippet || ''}`)
   ].join(' ');
   const sourceTokens = new Set(tokenize(sourceText));
 
