@@ -197,6 +197,14 @@ export default function OverviewPage() {
             <span>System Health</span>
           </button>
 
+          <button
+            onClick={() => setIsAIQualityOpen(true)}
+            className="px-3 py-1.5 rounded-lg bg-purple-950/30 hover:bg-purple-950/50 border border-purple-500/30 text-purple-300 font-bold text-xs transition-colors flex items-center gap-1.5"
+          >
+            <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+            <span>AI Quality & Gate</span>
+          </button>
+
           {userProfile && activeWorkspace && (
             <WorkspaceSwitcher
               workspaces={userProfile.workspaces}
@@ -439,6 +447,12 @@ export default function OverviewPage() {
       <SystemStatusModal
         isOpen={isSystemStatusOpen}
         onClose={() => setIsSystemStatusOpen(false)}
+      />
+
+      {/* Phase 13 AI Evaluation, Routing & Quality Gate Modal */}
+      <AIQualityModal
+        isOpen={isAIQualityOpen}
+        onClose={() => setIsAIQualityOpen(false)}
       />
 
     </div>
