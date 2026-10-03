@@ -1,4 +1,4 @@
-import { ModelTelemetryEntry, EvaluationSummaryMetrics } from './types';
+import { ModelTelemetryEntry } from './types';
 import { calculateTokenCostUsd } from './cost';
 
 const telemetryEntries: ModelTelemetryEntry[] = [

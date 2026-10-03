@@ -1,5 +1,5 @@
-import { TaskType, RouteDecision, ModelDefinition } from './types';
-import { SUPPORTED_MODELS, getModelById } from './models';
+import { TaskType, RouteDecision } from './types';
+import { SUPPORTED_MODELS } from './models';
 import { calculateTokenCostUsd } from './cost';
 
 export function routeTask(

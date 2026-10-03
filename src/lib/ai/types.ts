@@ -1,6 +1,3 @@
-import { EventCluster } from '@/lib/clustering/types';
-import { AnalysisReport } from '@/lib/analysis/types';
-
 export type ModelTier = 'FAST' | 'BALANCED' | 'REASONING' | 'FALLBACK';
 
 export type TaskType = 

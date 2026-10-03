@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { X, Sparkles, ShieldCheck, CheckCircle2, AlertTriangle, Cpu, DollarSign, Activity, Route } from 'lucide-react';
-import { ModelDefinition, QualityGateResult, ModelTelemetryEntry, EvaluationSummaryMetrics, RegressionBenchmark } from '@/lib/ai/types';
+import { X, Sparkles, ShieldCheck, Activity, Route } from 'lucide-react';
+import { ModelDefinition, ModelTelemetryEntry, EvaluationSummaryMetrics, RegressionBenchmark, RouteDecision } from '@/lib/ai/types';
 
 interface AIQualityModalProps {
   isOpen: boolean;
@@ -16,7 +16,7 @@ export default function AIQualityModal({ isOpen, onClose }: AIQualityModalProps)
   const [telemetry, setTelemetry] = useState<ModelTelemetryEntry[]>([]);
   const [regressions, setRegressions] = useState<RegressionBenchmark[]>([]);
   const [selectedTaskType, setSelectedTaskType] = useState('DEEP_ANALYSIS');
-  const [routeResult, setRouteResult] = useState<any>(null);
+  const [routeResult, setRouteResult] = useState<RouteDecision | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
