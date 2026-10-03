@@ -11,18 +11,18 @@ describe('Citation Evaluator', () => {
     stories: [
       {
         id: 'fed_story_1',
-        title: 'Fed holds rates steady in March meeting',
-        description: 'Chairman announced the rate target remains between 5.25% and 5.50%.',
-        source: 'Bloomberg',
-        sourceId: 'src_bloomberg',
-        url: 'https://bloomberg.com/fed-rates',
+        headline: 'Fed holds rates steady in March meeting',
+        summary: 'Chairman announced the rate target remains between 5.25% and 5.50%.',
+        sourceName: 'Bloomberg',
+        sourceUrl: 'https://bloomberg.com',
+        articleUrl: 'https://bloomberg.com/fed-rates',
         publishedAt: '2026-03-20T14:00:00Z',
-        category: 'BUSINESS',
-        topics: ['Economy', 'Rates'],
-        isBreaking: false
+        retrievedAt: '2026-03-20T14:01:00Z',
+        category: 'business',
+        sourceType: 'rss'
       }
     ],
-    primaryCategory: 'BUSINESS',
+    primaryCategory: 'business',
     publishers: ['Bloomberg'],
     storyCount: 1,
     publisherCount: 1,

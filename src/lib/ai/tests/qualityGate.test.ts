@@ -11,19 +11,18 @@ describe('AI Report Quality Gate', () => {
     stories: [
       {
         id: 'qc_story_1',
-        title: 'Quantum computing milestone reached',
-        description: 'Researchers demonstrate fault-tolerant quantum error correction.',
-        contentSnippet: 'The 1000 qubit benchmark was verified in laboratory trials.',
-        source: 'Nature News',
-        sourceId: 'src_nature',
-        url: 'https://nature.com/quantum',
+        headline: 'Quantum computing milestone reached',
+        summary: 'Researchers demonstrate fault-tolerant quantum error correction in laboratory trials.',
+        sourceName: 'Nature News',
+        sourceUrl: 'https://nature.com',
+        articleUrl: 'https://nature.com/quantum',
         publishedAt: '2026-04-01T12:00:00Z',
-        category: 'TECHNOLOGY',
-        topics: ['Quantum', 'Physics'],
-        isBreaking: true
+        retrievedAt: '2026-04-01T12:01:00Z',
+        category: 'ai-tech',
+        sourceType: 'rss'
       }
     ],
-    primaryCategory: 'TECHNOLOGY',
+    primaryCategory: 'ai-tech',
     publishers: ['Nature News'],
     storyCount: 1,
     publisherCount: 1,

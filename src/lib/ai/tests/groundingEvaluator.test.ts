@@ -11,19 +11,18 @@ describe('Grounding Evaluator', () => {
     stories: [
       {
         id: 'story_1',
-        title: 'Nvidia Blackwell GPUs announced at GTC',
-        description: 'CEO Jensen Huang introduced new high performance datacenter hardware.',
-        contentSnippet: 'Blackwell architecture delivers significant performance improvements for inference.',
-        source: 'TechCrunch',
-        sourceId: 'src_tc',
-        url: 'https://techcrunch.com/nvidia-blackwell',
+        headline: 'Nvidia Blackwell GPUs announced at GTC',
+        summary: 'CEO Jensen Huang introduced new high performance datacenter hardware. Blackwell architecture delivers significant performance improvements for inference.',
+        sourceName: 'TechCrunch',
+        sourceUrl: 'https://techcrunch.com',
+        articleUrl: 'https://techcrunch.com/nvidia-blackwell',
         publishedAt: '2026-03-18T10:00:00Z',
-        category: 'TECHNOLOGY',
-        topics: ['AI', 'Hardware'],
-        isBreaking: false
+        retrievedAt: '2026-03-18T10:01:00Z',
+        category: 'ai-tech',
+        sourceType: 'rss'
       }
     ],
-    primaryCategory: 'TECHNOLOGY',
+    primaryCategory: 'ai-tech',
     publishers: ['TechCrunch'],
     storyCount: 1,
     publisherCount: 1,
