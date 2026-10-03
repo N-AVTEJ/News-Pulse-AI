@@ -49,20 +49,26 @@ describe('Grounding Evaluator', () => {
   it('awards HIGH score to report grounded strictly in cluster evidence', () => {
     const report: AnalysisReport = {
       clusterId: 'cluster_test_1',
-      whatHappened: 'Nvidia announced new Blackwell architecture GPUs designed for AI datacenter hardware at GTC.',
+      executiveSummary: 'Nvidia announced new Blackwell architecture GPUs designed for AI datacenter hardware at GTC.',
+      keyDevelopments: ['Blackwell GPUs unveiled at GTC'],
       whyItMatters: 'It delivers significant performance improvements for large scale neural network inference.',
-      whoIsAffected: 'Datacenter operators and enterprise AI developers.',
-      whatChanged: 'Performance benchmarks increased over previous generation chips.',
-      whatIsUncertain: 'Commercial delivery timeline and individual system pricing.',
-      keyFacts: ['Nvidia introduced Blackwell GPUs', 'Performance gains for inference workloads'],
-      timeline: [],
-      entities: [
-        { name: 'Nvidia', type: 'COMPANY', mentions: 3, role: 'Chipmaker announcing hardware' },
-        { name: 'Blackwell', type: 'PRODUCT', mentions: 2, role: 'GPU architecture' }
-      ],
+      affectedOrganizations: ['Datacenter operators and enterprise AI developers'],
+      potentialImpact: [],
+      timelineSummary: 'Announced today during GTC keynote.',
+      knownFacts: ['Nvidia introduced Blackwell GPUs', 'Performance gains for inference workloads'],
+      remainingUncertainty: [],
       citations: [],
-      confidenceScore: 90,
-      generatedAt: '2026-03-18T10:05:00Z'
+      entities: [
+        { id: 'e1', name: 'Nvidia', category: 'COMPANY', mentionCount: 3, sourceArticles: ['story_1'] },
+        { id: 'e2', name: 'Blackwell', category: 'PRODUCT', mentionCount: 2, sourceArticles: ['story_1'] }
+      ],
+      entityRelationships: [],
+      relatedEvents: [],
+      provider: 'test-model',
+      generatedAt: '2026-03-18T10:05:00Z',
+      durationMs: 300,
+      validationPassed: true,
+      validationNotes: []
     };
 
     const score = evaluateGrounding(mockCluster, report);
@@ -74,19 +80,25 @@ describe('Grounding Evaluator', () => {
   it('penalizes hallucinated reports mentioning ungrounded entities', () => {
     const hallucinatedReport: AnalysisReport = {
       clusterId: 'cluster_test_1',
-      whatHappened: 'Unrelated aerospace manufacturer launched satellite constellation into orbit with rocket.',
+      executiveSummary: 'Unrelated aerospace manufacturer launched satellite constellation into orbit with rocket.',
+      keyDevelopments: ['Satellite launch success'],
       whyItMatters: 'Maritime communication connectivity improved across polar regions.',
-      whoIsAffected: 'Satellite operators and space agencies.',
-      whatChanged: 'Orbital coverage expanded.',
-      whatIsUncertain: 'Weather conditions for next launch.',
-      keyFacts: ['Satellite launch success'],
-      timeline: [],
-      entities: [
-        { name: 'SpaceX', type: 'COMPANY', mentions: 1, role: 'Launcher' }
-      ],
+      affectedOrganizations: ['Satellite operators and space agencies'],
+      potentialImpact: [],
+      timelineSummary: 'Launch took place this morning.',
+      knownFacts: ['Satellite launch success'],
+      remainingUncertainty: [],
       citations: [],
-      confidenceScore: 30,
-      generatedAt: '2026-03-18T10:05:00Z'
+      entities: [
+        { id: 'e_fake', name: 'SpaceX', category: 'COMPANY', mentionCount: 1, sourceArticles: ['story_fake'] }
+      ],
+      entityRelationships: [],
+      relatedEvents: [],
+      provider: 'test-model',
+      generatedAt: '2026-03-18T10:05:00Z',
+      durationMs: 300,
+      validationPassed: true,
+      validationNotes: []
     };
 
     const score = evaluateGrounding(mockCluster, hallucinatedReport);
