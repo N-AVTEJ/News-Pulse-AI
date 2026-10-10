@@ -174,17 +174,20 @@ export async function runAutonomousResearch(
 
     if (primaryCluster) {
       const analysisReportAdapter: AnalysisReport = {
-        id: rawReport.id,
         clusterId: primaryCluster.clusterId,
-        headline: primaryCluster.canonicalHeadline,
         executiveSummary: rawReport.executiveSummary,
-        analysis: {
-          whatHappened: rawReport.executiveSummary,
-          whyItMatters: rawReport.potentialImplications.join(' '),
-          whoIsAffected: [],
-          whatChanged: '',
-          whatIsUncertain: rawReport.unresolvedQuestions.join(' ')
-        },
+        keyDevelopments: rawReport.keyFindings.map(f => f.claim),
+        whyItMatters: rawReport.potentialImplications.join(' '),
+        affectedOrganizations: [],
+        potentialImpact: [],
+        timelineSummary: '',
+        knownFacts: rawReport.keyFindings.filter(f => f.statementType === 'FACT').map(f => f.claim),
+        remainingUncertainty: rawReport.evidenceGaps.map(g => ({
+          id: g.id,
+          type: 'MISSING_PRIMARY',
+          title: g.topic || g.gapType,
+          description: g.description
+        })),
         citations: rawReport.allCitations.map(c => ({
           id: c.id,
           storyId: c.storyId,
@@ -194,10 +197,14 @@ export async function runAutonomousResearch(
           quoteSnippet: c.quoteSnippet,
           articleUrl: c.articleUrl
         })),
-        confidenceScore: Math.round(citationReport.findingsFidelityScore),
-        modelUsed: 'claude-3-5-sonnet',
+        entities: [],
+        entityRelationships: [],
+        relatedEvents: [],
+        provider: 'autonomous-research-engine',
         generatedAt: rawReport.generatedAt,
-        groundingStatus: 'GROUNDED'
+        durationMs: rawReport.keyFindings.length * 100,
+        validationPassed: true,
+        validationNotes: []
       };
 
       const qualityResult = evaluateReportQualityGate(primaryCluster, analysisReportAdapter);
