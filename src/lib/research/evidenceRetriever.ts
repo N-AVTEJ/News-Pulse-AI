@@ -89,7 +89,7 @@ export async function retrieveEvidenceForTask(
           headline: story.headline,
           publishedAt: story.publishedAt,
           quoteSnippet: story.summary.slice(0, 150),
-          isPrimarySource: cluster.verificationResult?.primarySourceCount ? cluster.verificationResult.primarySourceCount > 0 : false
+          isPrimarySource: cluster.verificationResult?.primarySources ? cluster.verificationResult.primarySources.length > 0 : false
         });
       }
     }

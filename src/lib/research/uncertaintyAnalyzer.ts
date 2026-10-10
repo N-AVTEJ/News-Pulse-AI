@@ -21,7 +21,10 @@ export function analyzeUncertaintiesAndGaps(
 
   // 1. Identify Contradictions across findings and verification results
   for (const cluster of clusters) {
-    if (cluster.verificationResult?.conflictDetected) {
+    const hasConflict = (cluster.verificationResult?.conflictingSources && cluster.verificationResult.conflictingSources.length > 0) ||
+      cluster.verificationResult?.verificationStatus === 'CONFLICTING_REPORTS';
+
+    if (hasConflict) {
       contradictions.push({
         id: `contra_${cluster.clusterId}`,
         topic: cluster.canonicalHeadline,
@@ -29,7 +32,7 @@ export function analyzeUncertaintiesAndGaps(
         claimB: `Conflicting reporting noted across publishers (${cluster.publishers.join(', ')})`,
         supportingSourcesA: [cluster.publishers[0] || 'Unknown Source'],
         supportingSourcesB: cluster.publishers.slice(1),
-        severity: cluster.verificationResult.verificationStatus === 'UNVERIFIED_CONFLICT' ? 'HIGH' : 'MEDIUM',
+        severity: 'HIGH',
         resolutionStatus: 'PERSISTENT_CONFLICT',
         explanation: 'Multiple news outlets published differing accounts or conflicting quantitative figures.'
       });
@@ -47,7 +50,7 @@ export function analyzeUncertaintiesAndGaps(
     }
 
     // Missing primary evidence check
-    if (cluster.verificationResult && cluster.verificationResult.primarySourceCount === 0) {
+    if (cluster.verificationResult && cluster.verificationResult.primarySources && cluster.verificationResult.primarySources.length === 0) {
       evidenceGaps.push({
         id: `gap_primary_${cluster.clusterId}`,
         description: `No direct primary source (e.g. official announcement, regulatory filing) identified for "${cluster.canonicalHeadline.slice(0, 50)}...".`,

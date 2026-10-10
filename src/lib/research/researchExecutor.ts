@@ -54,8 +54,11 @@ async function executeSingleTask(
         headline: topStory.headline,
         publishedAt: topStory.publishedAt,
         quoteSnippet: topStory.summary.slice(0, 150),
-        isPrimarySource: cluster.verificationResult?.primarySourceCount ? cluster.verificationResult.primarySourceCount > 0 : false
+        isPrimarySource: cluster.verificationResult?.primarySources ? cluster.verificationResult.primarySources.length > 0 : false
       }] : [];
+
+      const hasConflict = (cluster.verificationResult?.conflictingSources && cluster.verificationResult.conflictingSources.length > 0) ||
+        cluster.verificationResult?.verificationStatus === 'CONFLICTING_REPORTS';
 
       findings.push({
         id: `finding_${task.id}_${cluster.clusterId}`,
@@ -64,8 +67,8 @@ async function executeSingleTask(
         statementType: 'FACT',
         supportingCitations: supportingCite,
         contradictingCitations: [],
-        confidenceScore: cluster.verificationResult ? cluster.verificationResult.corroborationScore : 85,
-        uncertaintyNotes: cluster.verificationResult?.conflictDetected ? 'Conflicting coverage noted in initial reports' : undefined,
+        confidenceScore: cluster.verificationResult ? Math.min(100, Math.max(60, cluster.verificationResult.independentSources * 30)) : 85,
+        uncertaintyNotes: hasConflict ? 'Conflicting coverage noted in initial reports' : undefined,
         validationStatus: 'VALIDATED'
       });
     }
