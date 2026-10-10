@@ -20,15 +20,29 @@ describe('Phase 14: Uncertainty & Contradiction Analyzer', () => {
       verificationResult: {
         clusterId: 'cluster-conflict-1',
         verificationStatus: 'CONFLICTING_REPORTS',
-        corroborationScore: 40,
-        sourceDiversityScore: 70,
-        evidenceQualityScore: 60,
-        publicationConsistencyScore: 30,
-        corroboratingSourcesCount: 2,
-        primarySourceCount: 0,
+        supportingSources: ['Source A', 'Source B'],
+        independentSources: 2,
+        primarySources: [],
+        secondarySources: [],
+        conflictingSources: [
+          {
+            id: 'conf-1',
+            sourceId: 's-a',
+            sourceName: 'Source A',
+            sourceUrl: '',
+            articleUrl: '',
+            headline: 'Casualty figure initial',
+            summary: '50 reported',
+            publishedAt: '',
+            retrievedAt: '',
+            category: 'world'
+          }
+        ],
         evidenceCount: 2,
-        conflictDetected: true,
-        evaluatedAt: new Date().toISOString()
+        verificationReasons: ['Conflicting casualty counts reported'],
+        generatedAt: new Date().toISOString(),
+        semanticAgreement: null,
+        claimConsistency: null
       }
     };
 

@@ -33,15 +33,16 @@ describe('Phase 14: Evidence Retriever', () => {
       verificationResult: {
         clusterId: 'cluster-ai-1',
         verificationStatus: 'LIMITED_CORROBORATION',
-        corroborationScore: 75,
-        sourceDiversityScore: 50,
-        evidenceQualityScore: 80,
-        publicationConsistencyScore: 85,
-        corroboratingSourcesCount: 1,
-        primarySourceCount: 1,
+        supportingSources: ['TechWire'],
+        independentSources: 1,
+        primarySources: [],
+        secondarySources: [],
+        conflictingSources: [],
         evidenceCount: 1,
-        conflictDetected: false,
-        evaluatedAt: new Date().toISOString()
+        verificationReasons: ['Single primary source reported'],
+        generatedAt: new Date().toISOString(),
+        semanticAgreement: null,
+        claimConsistency: null
       }
     },
     {
