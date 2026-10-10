@@ -179,7 +179,7 @@ class ResearchHistoryStore {
           recommendedNextSteps: 'Monitor upcoming quarterly 10-Q regulatory filings and earnings calls.'
         }
       ],
-      crossEventLinks: [
+      crossEventRelationships: [
         {
           id: 'rel-1',
           sourceClusterId: 'cluster-semi-1',
