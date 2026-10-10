@@ -69,7 +69,7 @@ export function generateResearchReport(params: GenerateReportParams): ResearchRe
     if (sNode && tNode) {
       entityRelationships.push({
         entityA: sNode.canonicalName,
-        relationship: edge.relationType,
+        relationship: edge.relation,
         entityB: tNode.canonicalName,
         evidence: `Documented in ${edge.evidenceCount} verified cluster reports.`
       });

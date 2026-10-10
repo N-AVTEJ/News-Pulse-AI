@@ -173,6 +173,7 @@ class ResearchHistoryStore {
       evidenceGaps: [
         {
           id: 'gap-1',
+          gapType: 'MISSING_PRIMARY',
           topic: 'Foundry Wafer Allocation Quotas',
           description: 'Leading foundries do not publish exact percentage allocations across cloud hyperscaler clients.',
           recommendedNextSteps: 'Monitor upcoming quarterly 10-Q regulatory filings and earnings calls.'
