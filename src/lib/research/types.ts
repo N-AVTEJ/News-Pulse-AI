@@ -73,7 +73,9 @@ export interface EvidenceGap {
   id: string;
   description: string;
   gapType: GapType;
-  suggestedAction: string;
+  suggestedAction?: string;
+  topic?: string;
+  recommendedNextSteps?: string;
 }
 
 export interface CrossEventRelationship {

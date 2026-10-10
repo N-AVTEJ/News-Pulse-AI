@@ -688,8 +688,8 @@ export default function ResearchWorkspace({
                               >
                                 <span className="font-mono font-bold text-zinc-300">{gap.topic || gap.gapType}</span>
                                 <p className="text-zinc-400">{gap.description}</p>
-                                {gap.suggestedAction && (
-                                  <p className="text-cyan-400 font-mono text-[11px]">Action: {gap.suggestedAction}</p>
+                                {(gap.suggestedAction || gap.recommendedNextSteps) && (
+                                  <p className="text-cyan-400 font-mono text-[11px]">Action: {gap.suggestedAction || gap.recommendedNextSteps}</p>
                                 )}
                               </div>
                             ))}
