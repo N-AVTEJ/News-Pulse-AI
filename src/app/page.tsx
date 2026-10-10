@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Activity, Sparkles, Network, Code, GitBranch, Puzzle } from 'lucide-react';
+import { Activity, Sparkles, Network, Code, GitBranch, Puzzle, Compass } from 'lucide-react';
 import { usePulse } from '@/context/PulseContext';
 import EventClusterCard from '@/components/EventClusterCard';
 import EventClusterVisualizer from '@/components/EventClusterVisualizer';
@@ -28,6 +28,7 @@ import CustomDashboardBuilder from '@/components/CustomDashboardBuilder';
 import PluginRegistryModal from '@/components/PluginRegistryModal';
 import SystemStatusModal from '@/components/SystemStatusModal';
 import AIQualityModal from '@/components/AIQualityModal';
+import ResearchWorkspace from '@/components/ResearchWorkspace';
 import ActivityFeed from '@/components/ActivityFeed';
 import SourceStatusAlert from '@/components/SourceStatusAlert';
 import { EventCluster } from '@/lib/clustering/types';
