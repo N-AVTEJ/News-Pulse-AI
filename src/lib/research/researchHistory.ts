@@ -3,7 +3,7 @@
  * Manages storage, retrieval, filtering, and state updates for research runs.
  */
 
-import { ResearchRun } from './types';
+import { ResearchRun, ResearchReport } from './types';
 
 class ResearchHistoryStore {
   private runs: Map<string, ResearchRun> = new Map();
@@ -17,7 +17,7 @@ class ResearchHistoryStore {
    * Save or update a research run.
    */
   saveRun(run: ResearchRun): void {
-    this.runs.set(run.id, { ...run });
+    this.runs.set(run.id, { ...run, updatedAt: new Date().toISOString() });
     // Enforce max size limit
     if (this.runs.size > this.maxEntries) {
       const oldestKey = this.runs.keys().next().value;
@@ -44,8 +44,8 @@ class ResearchHistoryStore {
       result = result.filter(r => r.workspaceId === workspaceId);
     }
 
-    // Sort descending by startedAt
-    result.sort((a, b) => new Date(b.startedAt).getTime() - new Date(a.startedAt).getTime());
+    // Sort descending by createdAt / startedAt
+    result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
 
     return result.slice(0, limit);
   }
@@ -57,9 +57,10 @@ class ResearchHistoryStore {
     const existing = this.runs.get(id);
     if (!existing) return undefined;
 
-    const updated = {
+    const updated: ResearchRun = {
       ...existing,
       ...updates,
+      updatedAt: new Date().toISOString()
     };
     this.runs.set(id, updated);
     return updated;
@@ -73,18 +74,19 @@ class ResearchHistoryStore {
     if (!run) return false;
 
     if (run.status === 'COMPLETED' || run.status === 'FAILED' || run.status === 'CANCELLED') {
-      return false; // Cannot cancel finished run
+      return false; // Cannot cancel already terminated run
     }
 
     run.status = 'CANCELLED';
-    run.cancelled = true;
+    run.cancelRequested = true;
     run.completedAt = new Date().toISOString();
+    run.updatedAt = new Date().toISOString();
     this.runs.set(id, run);
     return true;
   }
 
   /**
-   * Search research runs by question keyword or entity.
+   * Search research runs by question keyword or executive summary.
    */
   searchRuns(query: string): ResearchRun[] {
     const q = query.toLowerCase().trim();
@@ -92,9 +94,9 @@ class ResearchHistoryStore {
 
     return Array.from(this.runs.values()).filter(run => {
       const questionMatch = run.question.toLowerCase().includes(q);
-      const entityMatch = run.taskPlan?.resolvedEntities?.some(e => e.name.toLowerCase().includes(q));
       const summaryMatch = run.report?.executiveSummary?.toLowerCase().includes(q);
-      return questionMatch || entityMatch || summaryMatch;
+      const findingsMatch = run.findings.some(f => f.claim.toLowerCase().includes(q));
+      return questionMatch || summaryMatch || findingsMatch;
     });
   }
 
@@ -109,201 +111,217 @@ class ResearchHistoryStore {
    * Seed realistic sample runs for immediate UI preview and verification.
    */
   private seedSampleRuns(): void {
-    const sampleRunId = 'research-run-sample-1';
-    const sampleRun: ResearchRun = {
-      id: sampleRunId,
+    const now = new Date();
+    const pastHour = new Date(now.getTime() - 3600000).toISOString();
+    const past50m = new Date(now.getTime() - 3000000).toISOString();
+
+    const sampleReport: ResearchReport = {
+      id: 'report-sample-1',
+      runId: 'run-seed-1',
       question: 'What is the impact of generative AI chip supply constraints on enterprise cloud infrastructure?',
-      workspaceId: 'workspace-default',
-      createdBy: 'user-senior-analyst',
-      status: 'COMPLETED',
-      startedAt: new Date(Date.now() - 3600000).toISOString(),
-      completedAt: new Date(Date.now() - 3550000).toISOString(),
-      executionTimeMs: 49500,
-      reviewRequired: false,
-      taskPlan: {
-        id: 'plan-sample-1',
-        primaryQuestion: 'What is the impact of generative AI chip supply constraints on enterprise cloud infrastructure?',
-        subQuestions: [
-          'What are current GPU and accelerator fabrication lead times from major semiconductor foundries?',
-          'How are hyperscalers rationing cloud capacity and adjusting multi-instance pricing tiers?',
-          'What alternative hardware architectures and edge deployment alternatives are emerging?'
-        ],
-        tasks: [
-          {
-            id: 'task-1',
-            question: 'What are current GPU and accelerator fabrication lead times from major semiconductor foundries?',
-            status: 'COMPLETED',
-            assignedTo: 'AI_ANALYST',
-            dependsOn: [],
-            sourcesTargeted: ['Reuters Tech', 'Semiconductor Digest', 'Bloomberg Intelligence'],
-            findings: [
-              'Advanced packaging bottlenecks at leading foundries have extended accelerator delivery lead times to 26-34 weeks for premier tensor processing units.'
-            ],
-            confidence: 0.88,
-            citations: [
-              {
-                sourceName: 'Reuters Tech',
-                headline: 'Foundry packaging constraints tighten AI accelerator shipments',
-                url: 'https://reuters.com/tech/ai-semiconductor-packaging',
-                timestamp: new Date(Date.now() - 86400000).toISOString(),
-                quoteSnippet: 'Packaging constraints have pushed enterprise waitlists well beyond two quarters.',
-                groundedStatus: 'GROUNDED'
-              }
-            ]
-          },
-          {
-            id: 'task-2',
-            question: 'How are hyperscalers rationing cloud capacity and adjusting multi-instance pricing tiers?',
-            status: 'COMPLETED',
-            assignedTo: 'AI_ANALYST',
-            dependsOn: ['task-1'],
-            sourcesTargeted: ['Cloud Computing Weekly', 'Enterprise Tech Review'],
-            findings: [
-              'Hyperscale cloud providers have introduced quota reservations and 1-year minimum commitments for H100 and equivalent tier instances.'
-            ],
-            confidence: 0.84,
-            citations: [
-              {
-                sourceName: 'Cloud Computing Weekly',
-                headline: 'Enterprise cloud capacity reservations surge amidst GPU demand',
-                url: 'https://cloudweekly.net/gpu-capacity-reservation',
-                timestamp: new Date(Date.now() - 43200000).toISOString(),
-                quoteSnippet: 'Multi-year reserved instance commitments now govern tier-1 accelerator access.',
-                groundedStatus: 'GROUNDED'
-              }
-            ]
-          }
-        ],
-        resolvedEntities: [
-          { id: 'semiconductor-foundries', name: 'Semiconductor Foundries', type: 'SECTOR', mentions: 12 },
-          { id: 'hyperscale-cloud', name: 'Hyperscale Cloud Providers', type: 'ORGANIZATION', mentions: 8 }
-        ],
-        timeHorizon: {
-          after: new Date(Date.now() - 30 * 86400000).toISOString(),
-          before: new Date().toISOString()
+      executiveSummary: 'AI accelerator supply constraints continue to dictate enterprise cloud expansion timelines. Advanced packaging limitations maintain lead times of up to 34 weeks, prompting major cloud hyperscalers to require multi-quarter capacity reservations. Organizations are increasingly evaluating hybrid on-premises and specialized cloud architectures.',
+      researchScope: 'Cross-industry analysis of semiconductor fabrication bottlenecks, cloud pricing shifts, and enterprise AI inference infrastructure from 14 verified articles.',
+      keyFindings: [
+        {
+          id: 'finding-1',
+          taskId: 'task-1',
+          claim: 'Advanced packaging bottlenecks extend AI accelerator delivery lead times to 26-34 weeks for top-tier chips.',
+          statementType: 'FACT',
+          supportingCitations: [
+            {
+              id: 'cite-1',
+              storyId: 'story-semi-1',
+              clusterId: 'cluster-semi-1',
+              publisherName: 'Reuters Tech',
+              sourceUrl: 'https://reuters.com/tech',
+              articleUrl: 'https://reuters.com/tech/ai-semiconductor-packaging',
+              headline: 'Foundry packaging constraints tighten AI accelerator shipments',
+              publishedAt: new Date(now.getTime() - 86400000).toISOString(),
+              quoteSnippet: 'Packaging constraints have pushed enterprise waitlists well beyond two quarters.',
+              isPrimarySource: true
+            }
+          ],
+          contradictingCitations: [],
+          confidenceScore: 92,
+          validationStatus: 'VALIDATED'
         },
-        primaryDomain: 'TECHNOLOGY',
-        createdAt: new Date(Date.now() - 3600000).toISOString()
-      },
-      report: {
-        id: 'report-sample-1',
-        title: 'Deep Intelligence: Generative AI Chip Supply & Enterprise Cloud Infrastructure',
-        question: 'What is the impact of generative AI chip supply constraints on enterprise cloud infrastructure?',
-        executiveSummary: 'AI accelerator supply constraints continue to dictate enterprise cloud expansion timelines. Advanced packaging limitations maintain lead times of up to 34 weeks, prompting major cloud hyperscalers to require long-term capacity reservations. Organizations are increasingly evaluating hybrid on-premises and specialized cloud architectures.',
-        scope: {
-          domains: ['TECHNOLOGY'],
-          timeHorizon: {
-            after: new Date(Date.now() - 30 * 86400000).toISOString(),
-            before: new Date().toISOString()
-          },
-          sourcesSurveyed: 5,
-          articlesEvaluated: 14,
-          entitiesAnalyzed: 2
+        {
+          id: 'finding-2',
+          taskId: 'task-2',
+          claim: 'Cloud hyperscalers have introduced quota reservations and 1-year minimum commitments for H100 and equivalent tier instances.',
+          statementType: 'FACT',
+          supportingCitations: [
+            {
+              id: 'cite-2',
+              storyId: 'story-cloud-1',
+              clusterId: 'cluster-cloud-1',
+              publisherName: 'Cloud Computing Weekly',
+              sourceUrl: 'https://cloudweekly.net',
+              articleUrl: 'https://cloudweekly.net/gpu-capacity-reservation',
+              headline: 'Enterprise cloud capacity reservations surge amidst GPU demand',
+              publishedAt: new Date(now.getTime() - 43200000).toISOString(),
+              quoteSnippet: 'Multi-year reserved instance commitments now govern tier-1 accelerator access.',
+              isPrimarySource: true
+            }
+          ],
+          contradictingCitations: [],
+          confidenceScore: 88,
+          validationStatus: 'VALIDATED'
+        }
+      ],
+      contradictions: [],
+      evidenceGaps: [
+        {
+          id: 'gap-1',
+          topic: 'Foundry Wafer Allocation Quotas',
+          description: 'Leading foundries do not publish exact percentage allocations across cloud hyperscaler clients.',
+          recommendedNextSteps: 'Monitor upcoming quarterly 10-Q regulatory filings and earnings calls.'
+        }
+      ],
+      crossEventLinks: [
+        {
+          id: 'rel-1',
+          sourceClusterId: 'cluster-semi-1',
+          targetClusterId: 'cluster-cloud-1',
+          relationType: 'THEMATIC_CORRELATION',
+          description: 'Advanced packaging delays directly coincide with cloud compute instance price adjustments.'
+        }
+      ],
+      historicalTimeline: [
+        {
+          timestamp: new Date(now.getTime() - 20 * 86400000).toISOString(),
+          eventHeadline: 'Foundries announce planned capacity expansions for high-density advanced packaging lines.',
+          source: 'Semiconductor Digest',
+          significance: 'High'
         },
-        findings: [
-          {
-            id: 'finding-1',
-            claim: 'Advanced packaging bottlenecks at leading foundries extend accelerator delivery lead times to 26-34 weeks.',
-            synthesis: 'Packaging capacity remains the primary throttle on shipment volumes rather than silicon wafer yield alone.',
-            confidence: 0.88,
-            primarySourceType: 'JOURNALISTIC',
-            corroborationCount: 3,
-            citations: [
-              {
-                sourceName: 'Reuters Tech',
-                headline: 'Foundry packaging constraints tighten AI accelerator shipments',
-                url: 'https://reuters.com/tech/ai-semiconductor-packaging',
-                timestamp: new Date(Date.now() - 86400000).toISOString(),
-                quoteSnippet: 'Packaging constraints have pushed enterprise waitlists well beyond two quarters.',
-                groundedStatus: 'GROUNDED'
-              }
-            ]
-          },
-          {
-            id: 'finding-2',
-            claim: 'Hyperscalers require multi-quarter commitments for peak tier accelerator compute.',
-            synthesis: 'On-demand spot instance availability has declined in favor of reserved compute contracts.',
-            confidence: 0.84,
-            primarySourceType: 'JOURNALISTIC',
-            corroborationCount: 2,
-            citations: [
-              {
-                sourceName: 'Cloud Computing Weekly',
-                headline: 'Enterprise cloud capacity reservations surge amidst GPU demand',
-                url: 'https://cloudweekly.net/gpu-capacity-reservation',
-                timestamp: new Date(Date.now() - 43200000).toISOString(),
-                quoteSnippet: 'Multi-year reserved instance commitments now govern tier-1 accelerator access.',
-                groundedStatus: 'GROUNDED'
-              }
-            ]
-          }
-        ],
-        contradictions: [],
-        evidenceGaps: [
-          {
-            topic: 'Exact monthly foundry wafer output quotas',
-            severity: 'LOW',
-            explanation: 'Foundries do not publicly disclose specific wafer allocation proportions across competing enterprise clients.'
-          }
-        ],
-        crossEventLinks: [
-          {
-            clusterIdA: 'cluster-semi-1',
-            clusterIdB: 'cluster-cloud-2',
-            relationshipType: 'THEMATIC_CORRELATION',
-            description: 'Semiconductor delivery delays directly coincide with announced price adjustments in high-performance cloud tiers.',
-            confidence: 0.82
-          }
-        ],
-        historicalTimeline: [
-          {
-            date: new Date(Date.now() - 25 * 86400000).toISOString().split('T')[0],
-            event: 'Foundries announce planned capacity expansions for high-density advanced packaging lines.',
-            source: 'Semiconductor Digest'
-          },
-          {
-            date: new Date(Date.now() - 10 * 86400000).toISOString().split('T')[0],
-            event: 'Hyperscalers revise reserved instance pricing models for next-generation AI clusters.',
-            source: 'Cloud Computing Weekly'
-          }
-        ],
-        entityRelationships: [
-          {
-            sourceEntity: 'Semiconductor Foundries',
-            targetEntity: 'Hyperscale Cloud Providers',
-            relation: 'SUPPLIES_HARDWARE_TO',
-            evidenceStrength: 0.95
-          }
-        ],
-        strategicImplications: [
-          'Enterprise IT organizations must forecast accelerator demand at least two quarters in advance.',
-          'Small and mid-sized enterprises may rely on smaller open-weight models optimized for consumer or inferencing hardware.'
-        ],
-        unresolvedQuestions: [
-          'Will emerging sovereign AI initiatives further tighten commercial enterprise allocations?'
-        ],
-        citationIntegrityScore: 94,
-        confidenceScore: 86,
-        generatedAt: new Date(Date.now() - 3550000).toISOString()
-      },
-      qualityGate: {
+        {
+          timestamp: new Date(now.getTime() - 5 * 86400000).toISOString(),
+          eventHeadline: 'Hyperscalers revise reserved instance pricing models for next-generation AI clusters.',
+          source: 'Cloud Computing Weekly',
+          significance: 'High'
+        }
+      ],
+      entityRelationships: [
+        {
+          entityA: 'Semiconductor Foundries',
+          relationship: 'SUPPLIES_HARDWARE_TO',
+          entityB: 'Hyperscale Cloud Providers',
+          evidence: 'Foundry shipment quotas dictate available virtual machine availability.'
+        }
+      ],
+      potentialImplications: [
+        'Enterprise IT departments must forecast AI accelerator capacity requirements at least 6 months in advance.',
+        'Mid-market software enterprises will accelerate adoption of quantized and smaller open-weight models.'
+      ],
+      unresolvedQuestions: [
+        'Will upcoming 2nm node transitions ease or exacerbate packaging constraints in late 2026?'
+      ],
+      allCitations: [
+        {
+          id: 'cite-1',
+          storyId: 'story-semi-1',
+          clusterId: 'cluster-semi-1',
+          publisherName: 'Reuters Tech',
+          sourceUrl: 'https://reuters.com/tech',
+          articleUrl: 'https://reuters.com/tech/ai-semiconductor-packaging',
+          headline: 'Foundry packaging constraints tighten AI accelerator shipments',
+          publishedAt: new Date(now.getTime() - 86400000).toISOString(),
+          quoteSnippet: 'Packaging constraints have pushed enterprise waitlists well beyond two quarters.',
+          isPrimarySource: true
+        },
+        {
+          id: 'cite-2',
+          storyId: 'story-cloud-1',
+          clusterId: 'cluster-cloud-1',
+          publisherName: 'Cloud Computing Weekly',
+          sourceUrl: 'https://cloudweekly.net',
+          articleUrl: 'https://cloudweekly.net/gpu-capacity-reservation',
+          headline: 'Enterprise cloud capacity reservations surge amidst GPU demand',
+          publishedAt: new Date(now.getTime() - 43200000).toISOString(),
+          quoteSnippet: 'Multi-year reserved instance commitments now govern tier-1 accelerator access.',
+          isPrimarySource: true
+        }
+      ],
+      qualityGateResult: {
+        clusterId: 'cluster-semi-1',
         passed: true,
-        compositeScore: 91,
-        evaluation: {
-          claimGroundednessScore: 92,
-          citationAccuracyScore: 94,
-          corroborationScore: 88,
-          neutralityScore: 90,
-          completenessScore: 89,
-          overallScore: 91,
-          issues: [],
-          evaluatedAt: new Date(Date.now() - 3550000).toISOString()
+        decision: 'PUBLISH',
+        overallScore: 92,
+        grounding: {
+          score: 94,
+          lexicalOverlapRatio: 0.85,
+          entityGroundingRatio: 0.90,
+          unsupportedTokensCount: 4,
+          status: 'HIGH',
+          details: 'High factual grounding across verified articles.'
         },
-        reasons: ['High groundedness and valid citations across multiple sources.']
-      }
+        citations: {
+          score: 95,
+          validCitationsCount: 2,
+          invalidCitationsCount: 0,
+          hallucinatedSourceIds: [],
+          verifiedCitationIds: ['cite-1', 'cite-2'],
+          status: 'VERIFIED'
+        },
+        claims: {
+          score: 90,
+          totalClaimsCount: 2,
+          supportedClaimsCount: 2,
+          unsupportedClaims: [],
+          contradictedClaims: [],
+          confidence: 0.92
+        },
+        reasons: ['High grounding fidelity and authentic verified citations.'],
+        evaluatedAt: past50m
+      },
+      reviewRequired: false,
+      reviewReasons: [],
+      generatedAt: past50m
     };
 
-    this.runs.set(sampleRunId, sampleRun);
+    const sampleRun: ResearchRun = {
+      id: 'run-seed-1',
+      question: 'What is the impact of generative AI chip supply constraints on enterprise cloud infrastructure?',
+      userId: 'user-senior-analyst',
+      userRole: 'ANALYST',
+      workspaceId: 'workspace-default',
+      organizationId: 'org-enterprise-pulse',
+      status: 'COMPLETED',
+      tasks: [
+        {
+          id: 'task-1',
+          question: 'What are current GPU and accelerator fabrication lead times from major semiconductor foundries?',
+          topic: 'Semiconductors',
+          targetEntities: ['Semiconductor Foundries'],
+          requiredEvidenceType: 'PRIMARY_SOURCE',
+          status: 'COMPLETED',
+          resultReferences: ['cluster-semi-1'],
+          findingsCount: 1,
+          durationMs: 420
+        },
+        {
+          id: 'task-2',
+          question: 'How are hyperscalers rationing cloud capacity and adjusting multi-instance pricing tiers?',
+          topic: 'Cloud Infrastructure',
+          targetEntities: ['Hyperscale Cloud Providers'],
+          requiredEvidenceType: 'CORROBORATED_REPORT',
+          status: 'COMPLETED',
+          resultReferences: ['cluster-cloud-1'],
+          findingsCount: 1,
+          durationMs: 380
+        }
+      ],
+      findings: sampleReport.keyFindings,
+      report: sampleReport,
+      createdAt: pastHour,
+      updatedAt: past50m,
+      startedAt: pastHour,
+      completedAt: past50m,
+      durationMs: 12500,
+      cancelRequested: false
+    };
+
+    this.runs.set(sampleRun.id, sampleRun);
   }
 }
 
