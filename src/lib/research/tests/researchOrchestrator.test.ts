@@ -33,15 +33,16 @@ describe('Phase 14: Research Orchestrator End-to-End', () => {
       verificationResult: {
         clusterId: 'cluster-ai-test',
         verificationStatus: 'LIMITED_CORROBORATION',
-        corroborationScore: 80,
-        sourceDiversityScore: 50,
-        evidenceQualityScore: 85,
-        publicationConsistencyScore: 90,
-        corroboratingSourcesCount: 1,
-        primarySourceCount: 1,
+        supportingSources: ['TechWire'],
+        independentSources: 1,
+        primarySources: [],
+        secondarySources: [],
+        conflictingSources: [],
         evidenceCount: 1,
-        conflictDetected: false,
-        evaluatedAt: new Date().toISOString()
+        verificationReasons: ['Primary source report'],
+        generatedAt: new Date().toISOString(),
+        semanticAgreement: null,
+        claimConsistency: null
       }
     }
   ];
