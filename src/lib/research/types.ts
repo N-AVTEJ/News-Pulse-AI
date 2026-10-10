@@ -79,6 +79,7 @@ export interface EvidenceGap {
 }
 
 export interface CrossEventRelationship {
+  id?: string;
   sourceClusterId: string;
   targetClusterId: string;
   relationType: string;
