@@ -1,27 +1,22 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   X,
   Compass,
   Search,
   CheckCircle2,
   AlertTriangle,
-  Clock,
   Layers,
-  ArrowRight,
-  ShieldCheck,
   FileText,
-  GitBranch,
   RefreshCw,
   ExternalLink,
   ChevronDown,
   ChevronUp,
-  Sliders,
   Send,
   StopCircle
 } from 'lucide-react';
-import { ResearchRun, ResearchReport, ResearchFinding } from '@/lib/research/types';
+import { ResearchRun, ResearchReport } from '@/lib/research/types';
 import { Role } from '@/lib/enterprise/types';
 
 interface ResearchWorkspaceProps {
@@ -53,13 +48,7 @@ export default function ResearchWorkspace({
     'What are the latest benchmarks and safety evaluations for frontier multi-modal reasoning models?'
   ];
 
-  // Fetch runs on load
-  useEffect(() => {
-    if (!isOpen) return;
-    loadRuns();
-  }, [isOpen]);
-
-  const loadRuns = async () => {
+  const loadRuns = useCallback(async () => {
     try {
       const res = await fetch('/api/research', {
         headers: { 'x-user-role': userRole }
@@ -74,7 +63,13 @@ export default function ResearchWorkspace({
     } catch (err) {
       console.error('Failed to load research runs:', err);
     }
-  };
+  }, [userRole, selectedRun]);
+
+  // Fetch runs on load
+  useEffect(() => {
+    if (!isOpen) return;
+    loadRuns();
+  }, [isOpen, loadRuns]);
 
   const handleStartResearch = async (qToRun?: string) => {
     const q = (qToRun || question).trim();
@@ -519,7 +514,7 @@ export default function ResearchWorkspace({
                                         </div>
                                         <p className="text-zinc-200 font-sans font-medium">{cite.headline}</p>
                                         <p className="text-zinc-400 italic bg-zinc-900/60 p-2 rounded border border-zinc-800">
-                                          "{cite.quoteSnippet}"
+                                          &ldquo;{cite.quoteSnippet}&rdquo;
                                         </p>
                                         {cite.articleUrl && (
                                           <a
