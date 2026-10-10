@@ -297,7 +297,7 @@ export default function ResearchWorkspace({
             <div className="p-3 border-b border-zinc-900 flex items-center justify-between">
               <span className="text-xs font-bold text-zinc-400">RESEARCH RUNS ({runs.length})</span>
               <button
-                onClick={loadRuns}
+                onClick={refreshRuns}
                 className="p-1 rounded text-zinc-500 hover:text-zinc-300 transition-colors"
                 title="Reload history"
               >
