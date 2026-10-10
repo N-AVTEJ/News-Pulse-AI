@@ -186,10 +186,12 @@ export async function runAutonomousResearch(
           whatIsUncertain: rawReport.unresolvedQuestions.join(' ')
         },
         citations: rawReport.allCitations.map(c => ({
+          id: c.id,
+          storyId: c.storyId,
           publisherName: c.publisherName,
           headline: c.headline,
+          publishedAt: c.publishedAt,
           quoteSnippet: c.quoteSnippet,
-          storyId: c.storyId,
           articleUrl: c.articleUrl
         })),
         confidenceScore: Math.round(citationReport.findingsFidelityScore),
