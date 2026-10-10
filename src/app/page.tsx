@@ -102,6 +102,7 @@ export default function OverviewPage() {
   const [isPluginsOpen, setIsPluginsOpen] = useState(false);
   const [isSystemStatusOpen, setIsSystemStatusOpen] = useState(false);
   const [isAIQualityOpen, setIsAIQualityOpen] = useState(false);
+  const [isResearchWorkspaceOpen, setIsResearchWorkspaceOpen] = useState(false);
 
   const filteredClusters = eventClusters.filter((cluster) => {
     // 1. Natural language query result match
@@ -204,6 +205,14 @@ export default function OverviewPage() {
           >
             <Sparkles className="w-3.5 h-3.5 text-purple-400" />
             <span>AI Quality & Gate</span>
+          </button>
+
+          <button
+            onClick={() => setIsResearchWorkspaceOpen(true)}
+            className="px-3 py-1.5 rounded-lg bg-cyan-950/30 hover:bg-cyan-950/50 border border-cyan-500/30 text-cyan-300 font-bold text-xs transition-colors flex items-center gap-1.5"
+          >
+            <Compass className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Autonomous Research</span>
           </button>
 
           {userProfile && activeWorkspace && (
@@ -454,6 +463,13 @@ export default function OverviewPage() {
       <AIQualityModal
         isOpen={isAIQualityOpen}
         onClose={() => setIsAIQualityOpen(false)}
+      />
+
+      {/* Phase 14 Autonomous Research & Deep Intelligence Workspace */}
+      <ResearchWorkspace
+        isOpen={isResearchWorkspaceOpen}
+        onClose={() => setIsResearchWorkspaceOpen(false)}
+        onCreateInvestigation={createEnterpriseInvestigation}
       />
 
     </div>
