@@ -48,7 +48,7 @@ export default function ResearchWorkspace({
     'What are the latest benchmarks and safety evaluations for frontier multi-modal reasoning models?'
   ];
 
-  const loadRuns = useCallback(async () => {
+  const refreshRuns = useCallback(async () => {
     try {
       const res = await fetch('/api/research', {
         headers: { 'x-user-role': userRole }
@@ -56,20 +56,37 @@ export default function ResearchWorkspace({
       if (res.ok) {
         const data = await res.json();
         setRuns(data.runs || []);
-        if (data.runs && data.runs.length > 0 && !selectedRun) {
-          setSelectedRun(data.runs[0]);
-        }
       }
     } catch (err) {
-      console.error('Failed to load research runs:', err);
+      console.error('Failed to reload runs:', err);
     }
-  }, [userRole, selectedRun]);
+  }, [userRole]);
 
   // Fetch runs on load
   useEffect(() => {
     if (!isOpen) return;
-    loadRuns();
-  }, [isOpen, loadRuns]);
+
+    let isMounted = true;
+    fetch('/api/research', {
+      headers: { 'x-user-role': userRole }
+    })
+      .then(res => res.json())
+      .then(data => {
+        if (!isMounted) return;
+        const fetchedRuns = data.runs || [];
+        setRuns(fetchedRuns);
+        if (fetchedRuns.length > 0) {
+          setSelectedRun(prev => prev || fetchedRuns[0]);
+        }
+      })
+      .catch(err => {
+        console.error('Failed to load research runs:', err);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [isOpen, userRole]);
 
   const handleStartResearch = async (qToRun?: string) => {
     const q = (qToRun || question).trim();
