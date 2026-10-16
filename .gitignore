@@ -12,10 +12,12 @@
 
 # testing
 /coverage
-/.agents/
 # next.js
 /.next/
 /out/
+/.claude/
+/.agents/
+/agent/
 
 # production
 /build

@@ -121,6 +121,12 @@
       "skillPath": "skills/security-and-hardening/SKILL.md",
       "computedHash": "32a1243d6eb45fd342c1f4e9f9ee5f1651a1e9fdccb86dcbbbee5d6f455ed362"
     },
+    "security-review": {
+      "source": "hirokami3/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/security-review/SKILL.md",
+      "computedHash": "b6aa7a46d44d3f3c55d0401f110e359d956339665c283fde2eb000cbbdbe4dc3"
+    },
     "shipping-and-launch": {
       "source": "addyosmani/agent-skills",
       "sourceType": "github",
@@ -138,6 +144,12 @@
       "sourceType": "github",
       "skillPath": "skills/spec-driven-development/SKILL.md",
       "computedHash": "90a53ee823e49fd1518a01e6cf64968d4848bce3fc0b0115b1c19b7e5a87a5ca"
+    },
+    "tdd-workflow": {
+      "source": "hirokami3/everything-claude-code",
+      "sourceType": "github",
+      "skillPath": "skills/tdd-workflow/SKILL.md",
+      "computedHash": "a78131ad886c660b445d052a65b080c4f7f30aa5473ae45b64e1c94c7254fb30"
     },
     "test-driven-development": {
       "source": "addyosmani/agent-skills",
