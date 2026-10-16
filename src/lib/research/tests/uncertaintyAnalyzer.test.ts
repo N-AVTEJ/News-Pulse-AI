@@ -27,7 +27,7 @@ describe('Phase 14: Uncertainty & Contradiction Analyzer', () => {
         conflictingSources: [
           {
             id: 'conf-1',
-            sourceId: 's-a',
+            sourceType: 'rss',
             sourceName: 'Source A',
             sourceUrl: '',
             articleUrl: '',
@@ -54,7 +54,8 @@ describe('Phase 14: Uncertainty & Contradiction Analyzer', () => {
         statementType: 'FACT',
         supportingCitations: [],
         contradictingCitations: [],
-        confidenceScore: 70
+        confidenceScore: 70,
+        validationStatus: 'UNSUPPORTED'
       }
     ];
 
@@ -73,9 +74,9 @@ describe('Phase 14: Uncertainty & Contradiction Analyzer', () => {
       firstSeen: new Date().toISOString(),
       lastUpdated: new Date().toISOString(),
       stories: [
-        { id: 's1', sourceId: 'wire', sourceName: 'SingleWire', sourceUrl: '', articleUrl: '', headline: '', summary: '', publishedAt: '', retrievedAt: '', category: 'world' },
-        { id: 's2', sourceId: 'wire', sourceName: 'SingleWire', sourceUrl: '', articleUrl: '', headline: '', summary: '', publishedAt: '', retrievedAt: '', category: 'world' },
-        { id: 's3', sourceId: 'wire', sourceName: 'SingleWire', sourceUrl: '', articleUrl: '', headline: '', summary: '', publishedAt: '', retrievedAt: '', category: 'world' }
+        { id: 's1', sourceType: 'rss', sourceName: 'SingleWire', sourceUrl: '', articleUrl: '', headline: '', summary: '', publishedAt: '', retrievedAt: '', category: 'world' },
+        { id: 's2', sourceType: 'rss', sourceName: 'SingleWire', sourceUrl: '', articleUrl: '', headline: '', summary: '', publishedAt: '', retrievedAt: '', category: 'world' },
+        { id: 's3', sourceType: 'rss', sourceName: 'SingleWire', sourceUrl: '', articleUrl: '', headline: '', summary: '', publishedAt: '', retrievedAt: '', category: 'world' }
       ],
       sources: ['SingleWire'],
       publishers: ['SingleWire'], // Only 1 publisher, but 3 stories
