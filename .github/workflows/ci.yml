@@ -6,10 +6,18 @@ on:
   pull_request:
     branches: [ main, master ]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   test_and_build:
     name: Lint, Test & Production Build
     runs-on: ubuntu-latest
+    timeout-minutes: 15
 
     steps:
       - name: Checkout Code Repository
@@ -27,8 +35,11 @@ jobs:
       - name: Run ESLint Code Quality Verification
         run: npm run lint
 
+      - name: Run TypeScript Type Check
+        run: npm run typecheck
+
       - name: Run Vitest Unit & Integration Test Suite
-        run: npx vitest run
+        run: npm test
 
       - name: Compile Next.js Production Build
         run: npm run build

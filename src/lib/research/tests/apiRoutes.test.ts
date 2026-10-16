@@ -24,7 +24,7 @@ describe('Phase 14: Research REST API Endpoints', () => {
   it('GET /api/research should reject unauthorized role lacking VIEW_EVENTS', async () => {
     // There are no roles without VIEW_EVENTS in default mapping, but invalid role will fail
     const req = new NextRequest('http://localhost:3000/api/research', {
-      headers: { 'x-user-role': 'INVALID_ROLE' as any }
+      headers: { 'x-user-role': 'INVALID_ROLE' }
     });
     const res = await getRuns(req);
     expect(res.status).toBe(403);
