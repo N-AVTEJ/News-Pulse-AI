@@ -14,7 +14,7 @@ describe('Phase 14: Research Orchestrator End-to-End', () => {
       stories: [
         {
           id: 'story-breakthrough-1',
-          sourceId: 'tech-wire',
+          sourceType: 'rss',
           sourceName: 'TechWire',
           sourceUrl: 'https://techwire.com',
           articleUrl: 'https://techwire.com/breakthrough-model',

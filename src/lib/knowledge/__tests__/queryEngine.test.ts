@@ -29,14 +29,16 @@ describe('Natural Language Query Engine', () => {
       verificationResult: {
         clusterId: 'c1',
         verificationStatus: 'STRONG_CORROBORATION',
-        corroborationScore: 85,
-        sourceDiversityScore: 90,
-        evidenceQualityScore: 80,
-        temporalConsistencyScore: 85,
-        independentSources: 3,
-        primaryPublisherFound: true,
-        verificationReason: 'Verified',
-        generatedAt: new Date().toISOString()
+        supportingSources: ['OpenAI', 'Reuters'],
+        independentSources: 2,
+        primarySources: [],
+        secondarySources: [],
+        conflictingSources: [],
+        evidenceCount: 2,
+        verificationReasons: ['Multi-source confirmation'],
+        generatedAt: new Date().toISOString(),
+        semanticAgreement: null,
+        claimConsistency: null
       }
     }
   ];

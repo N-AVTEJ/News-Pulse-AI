@@ -6,7 +6,7 @@ import { ResearchCitation, ResearchFinding } from '../types';
 describe('Phase 14: Citation Validator', () => {
   const authenticStory: NewsStory = {
     id: 'story-auth-1',
-    sourceId: 'reuters',
+    sourceType: 'rss',
     sourceName: 'Reuters',
     sourceUrl: 'https://reuters.com',
     articleUrl: 'https://reuters.com/tech/ai-superchips',
@@ -38,7 +38,8 @@ describe('Phase 14: Citation Validator', () => {
       statementType: 'FACT',
       supportingCitations: [validCitation],
       contradictingCitations: [],
-      confidenceScore: 90
+      confidenceScore: 90,
+      validationStatus: 'VALIDATED'
     };
 
     const report = validateResearchCitations([validCitation], [authenticStory], [finding]);
@@ -72,7 +73,8 @@ describe('Phase 14: Citation Validator', () => {
       statementType: 'FACT',
       supportingCitations: [fakeCitation],
       contradictingCitations: [],
-      confidenceScore: 30
+      confidenceScore: 30,
+      validationStatus: 'UNSUPPORTED'
     };
 
     const report = validateResearchCitations([fakeCitation], [authenticStory], [finding]);
@@ -91,7 +93,8 @@ describe('Phase 14: Citation Validator', () => {
       statementType: 'FACT',
       supportingCitations: [],
       contradictingCitations: [],
-      confidenceScore: 40
+      confidenceScore: 40,
+      validationStatus: 'UNSUPPORTED'
     };
 
     const report = validateResearchCitations([], [authenticStory], [unsupportedFinding]);

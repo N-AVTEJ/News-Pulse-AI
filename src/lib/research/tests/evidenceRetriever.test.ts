@@ -14,7 +14,7 @@ describe('Phase 14: Evidence Retriever', () => {
       stories: [
         {
           id: 'story-nv-1',
-          sourceId: 'tech-wire',
+          sourceType: 'rss',
           sourceName: 'TechWire',
           sourceUrl: 'https://techwire.com',
           articleUrl: 'https://techwire.com/nvidia-blackwell',
@@ -54,7 +54,7 @@ describe('Phase 14: Evidence Retriever', () => {
       stories: [
         {
           id: 'story-cb-1',
-          sourceId: 'fin-times',
+          sourceType: 'rss',
           sourceName: 'Financial Times',
           sourceUrl: 'https://ft.com',
           articleUrl: 'https://ft.com/central-banks-rates',

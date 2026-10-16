@@ -14,7 +14,7 @@ describe('Phase 14: Research Executor', () => {
       stories: [
         {
           id: 's1',
-          sourceId: 'tech',
+          sourceType: 'rss',
           sourceName: 'TechJournal',
           sourceUrl: 'https://techjournal.com',
           articleUrl: 'https://techjournal.com/quantum-benchmark',
