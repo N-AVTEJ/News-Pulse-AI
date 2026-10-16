@@ -9,8 +9,7 @@ describe('Phase 14: Research Executor', () => {
       clusterId: 'c1',
       canonicalHeadline: 'Quantum computing lab achieves 1000 qubit benchmark',
       summary: 'Researchers set a major benchmark in quantum state coherence.',
-      firstSeen: new Date().toISOString(),
-      lastUpdated: new Date().toISOString(),
+      primaryCategory: 'ai-tech',
       stories: [
         {
           id: 's1',
@@ -25,11 +24,21 @@ describe('Phase 14: Research Executor', () => {
           category: 'ai-tech'
         }
       ],
-      sources: ['TechJournal'],
       publishers: ['TechJournal'],
-      primaryCategory: 'ai-tech',
-      velocity: 1.0,
-      urgencyScore: 70
+      storyCount: 1,
+      publisherCount: 1,
+      firstPublished: new Date().toISOString(),
+      latestPublished: new Date().toISOString(),
+      matchedScouts: ['tech-scout'],
+      matchedSignals: ['Quantum'],
+      perScoutScores: { 'tech-scout': 70 },
+      topSelectionScore: 70,
+      selectionReason: 'Quantum benchmark',
+      status: 'ACTIVE',
+      clusterReason: 'Single report on qubit record',
+      clusterBreakdown: { headlineSimilarity: 40, entityOverlap: 30, timeProximity: 20, categoryMatch: 10, totalScore: 100 },
+      importanceScore: null,
+      verificationScore: null
     }
   ];
 

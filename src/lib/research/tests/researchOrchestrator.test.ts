@@ -9,8 +9,7 @@ describe('Phase 14: Research Orchestrator End-to-End', () => {
       clusterId: 'cluster-ai-test',
       canonicalHeadline: 'Breakthrough multi-modal model released by frontier research lab',
       summary: 'A new model achieving high reasoning marks across standard benchmarks was released today.',
-      firstSeen: new Date().toISOString(),
-      lastUpdated: new Date().toISOString(),
+      primaryCategory: 'ai-tech',
       stories: [
         {
           id: 'story-breakthrough-1',
@@ -25,11 +24,21 @@ describe('Phase 14: Research Orchestrator End-to-End', () => {
           category: 'ai-tech'
         }
       ],
-      sources: ['TechWire'],
       publishers: ['TechWire'],
-      primaryCategory: 'ai-tech',
-      velocity: 2.0,
-      urgencyScore: 85,
+      storyCount: 1,
+      publisherCount: 1,
+      firstPublished: new Date().toISOString(),
+      latestPublished: new Date().toISOString(),
+      matchedScouts: ['tech-scout'],
+      matchedSignals: ['AI'],
+      perScoutScores: { 'tech-scout': 85 },
+      topSelectionScore: 85,
+      selectionReason: 'AI model',
+      status: 'ACTIVE',
+      clusterReason: 'Model release',
+      clusterBreakdown: { headlineSimilarity: 40, entityOverlap: 30, timeProximity: 20, categoryMatch: 10, totalScore: 100 },
+      importanceScore: null,
+      verificationScore: null,
       verificationResult: {
         clusterId: 'cluster-ai-test',
         verificationStatus: 'LIMITED_CORROBORATION',
